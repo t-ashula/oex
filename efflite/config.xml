@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widget xmlns="http://www.w3.org/ns/widgets">
+  <name>Extream Fast Forward Lite</name>
+  <description>Fastforward enhancement.</description>
+  <author href="http://ashula.info">t.ashula</author>
+  <icon src="icons/eff.png" />
+  <!-- icon source: http://openiconlibrary.sourceforge.net/gallery2/?./Icons/mimetypes/tango-style/image-x-generic.png -->
+  <access origin="*" />
+</widget>
