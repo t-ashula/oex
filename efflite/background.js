@@ -3,7 +3,9 @@
  */
 (function(){
   /* aliases */
-  var loc = window.location, doc = window.document, oex = opera.extenstion;
+  var loc = window.location.href,
+    doc = window.document, oex = opera.extension,
+    enc = window.enodeURIComponent, dec = window.decodeURIComponent;
   /* output debug string */
   var ods = (function( pkg, name ){
     return function( msg ){
@@ -115,22 +117,33 @@
   }
   
   function getXPathForUrl( url ) {
-    var defXPath = "//a";
+    ods('url:' + url);
+    for ( var i = 0, info; info = SITEINFO[ i ]; ++i ){
+      if ( url.match( info.url ) ) {
+        return { 'next' : info.nextLink };
+      }
+    }
+    return { 'next' : '(//a[@rel="next"])[last()]' };
   }
   
   /* onmessage */
   oex.onmessage = function( ev ) {
     var msg = ev.data, src = ev.source, cmd = msg.cmd, payload = msg.payload;
-    ods( cmd ); ods( payload );
+    ods( 'cmd:' + cmd ); ods( 'pay:' + payload );
     if ( cmd === 'res' ) {
-      ods( payload );
-      src.postMessage( { 'cmd':'res', 'payload': encodeURIComponent( loc ) } );
+      src.postMessage( {
+        'cmd':'res',
+        'payload': {
+          'next' : getXPathForUrl( dec( payload ) ).next
+        }
+      } );
       return;
     }
   };
   oex.onconnect = function( ev ) {
     var msg = ev.data, src = ev.source;
-    ods( ev );
+    ods( 'msg:' + msg );
+    ods( 'src:' + src );
     src.postMessage( { 'cmd' : 'req', 'payload' : 'send back url' } );
   };
 })();
