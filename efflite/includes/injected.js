@@ -50,9 +50,9 @@
     }
     function getUrlFormXpath( xpath ){
       var url = $X( xpath );
-      ods( 'xpath:' + xpath );
-      ods( 'url:' + url + ';' + typeof url );      
-      return !url ? "" : ( url instanceof Array ) ? url[ 0 ] : url;
+      ods( 'xpath:' + xpath ); ods( 'url:' + url + ';'  );
+      url = ( url instanceof Array ) ? url[ 0 ] : url;
+      return typeof url === 'string' ? url : "";
     }
     function appendNavi( d, type, xpath ){
       if ( $X( './/head/link[@rel="' + type + '"]', d ) != false ){
@@ -85,7 +85,7 @@
     };
     oex.onmessage = function( ev ) {
       var msg = ev.data, src = ev.source, cmd = msg.cmd, payload = msg.payload;
-      ods( 'cmd:' + cmd ); ods( 'pay:' + payload );
+      //ods( 'cmd:' + cmd ); ods( 'pay:' + payload );
       if ( cmd === 'req' ) {
         src.postMessage( { 'cmd' : 'res', 'payload' : enc( loc ) } );
         return;
@@ -94,6 +94,8 @@
         var h = { 'next' : appendNext, 'prev' : appendPrev };
         for ( var i in h ) if ( h.hasOwnProperty( i ) ) {
           if ( !!payload[ i ] ) {
+            ods( 'location:' + loc );
+            ods( i + ':' + payload[i] );
             h[ i ]( payload[ i ] );
           }
         }

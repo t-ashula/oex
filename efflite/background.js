@@ -135,7 +135,6 @@
               .replace( /"([^"\/]*)next([^"\/]*)"/g, rg( 'prev' ) )
               .replace( /"([^"\/]*)NEXT([^"\/]*)"/g, rg( 'PREV' ) )
               .replace( /"([^"\/]*)Next([^"\/]*)"/g, rg( 'Prev' ) );
-            ods( 'prev?:' + item.prevLink );
           }
         }
         ods( SITEINFO.length );          
@@ -146,8 +145,8 @@
   
   function getXPathForUrl( url ) {
     var paths = {
-      'next' : '(//a[@rel="next"])[last()]',
-      'prev' : '(//a[@rel="prev"])[last()]'
+      'next' : '(//a[@rel="next"] or //a[contains(text(),"Next")])[last()]',
+      'prev' : '(//a[@rel="prev"] or //a[contains(text(),"Prev")])[last()]'
     }, i, info;
     for ( i = 0; info = SITEINFO[ i ]; ++i ){
       if ( url.match( info.url ) ) {
@@ -164,7 +163,7 @@
     /* onmessage */
     oex.onmessage = function( ev ) {
       var msg = ev.data, src = ev.source, cmd = msg.cmd, payload = msg.payload, paths;
-      ods( 'cmd:' + cmd ); ods( 'pay:' + payload );
+      //ods( 'cmd:' + cmd ); ods( 'pay:' + payload );
       if ( cmd === 'res' ) {
         paths = getXPathForUrl( dec( payload ) );
         src.postMessage( {
@@ -179,13 +178,12 @@
     };
     oex.onconnect = function( ev ) {
       var msg = ev.data, src = ev.source;
-      ods( 'msg:' + msg ); ods( 'src:' + src );
+      //ods( 'msg:' + msg ); ods( 'src:' + src );
       try{
         src.postMessage( { 'cmd' : 'req', 'payload' : 'send back url' } );          
       } catch (x) {
         ods('onconnect:' + x );
       }
     };
-  }, false);
-  
+  }, false);  
 })();
