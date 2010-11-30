@@ -2,17 +2,18 @@
   Extream Fast Forward Lite Injected script
 */
 (function(){
-  /* aliases */
-  var win = window, loc = win.location, doc = win.document, oex = opera.extension,
-    enc = win.encodeURIComponent, dec = win.decodeURIComponent, XPathResult = win.XPathResult;
-  win.addEventListener('DOMContentLoaded', function(){
+  window.addEventListener( 'DOMContentLoaded', function(){
+    /* aliases */
+    var win = window, loc = win.location, doc = win.document, oex = opera.extension,
+      enc = win.encodeURIComponent, dec = win.decodeURIComponent, XPathResult = win.XPathResult;
+    
     /* output debug string */
     var ods = (function( pkg, name ){
       return function( msg ){
-        /**/ window.opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
+        /**/ win.opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
       };
     })( 'efflite','injected.js' );
-    function isOwner(){
+    function isOwner(win){
       var res = true;
       try {
         res = win.top === win;
@@ -21,24 +22,9 @@
         res = false;
       }
       return res;
-      }
-    function appendNext( xpath ) {
-      var nextUrl = $X( xpath );
-      if ( nextUrl != false ) {
-        ods( 'appendNext' + xpath + ' ' + nextUrl );
-        appendNavi( doc, 'next', nextUrl );
-        return;
-      }
     }
-    function appendNavi( d, type, href, force ){
-      if ( $X( './/head/link[@rel="' + type + '"]', d ) != false ){
-        ods('already exist');
-        return;
-      }
-      var h = d.getElementsByTagName( 'head' )[ 0 ], l = d.createElement( 'link' );
-      l.rel = type;
-      l.href = href;
-      h.appendChild( l );
+    if ( !isOwner(window) ){
+      return;
     }
     // http://lowreal.net/logs/2006/03/16/1
     function $X( x, context ) {
@@ -62,20 +48,55 @@
       }
       return null;
     }
-    
-    if ( !isOwner() ){
-      return;
+    function getUrlFormXpath( xpath ){
+      var url = $X( xpath );
+      ods( 'xpath:' + xpath );
+      ods( 'url:' + url + ';' + typeof url );      
+      return !url ? "" : ( url instanceof Array ) ? url[ 0 ] : url;
     }
+    function appendNavi( d, type, xpath ){
+      if ( $X( './/head/link[@rel="' + type + '"]', d ) != false ){
+        ods('already exist');
+        return;
+      }      
+      var h, l, href = getUrlFormXpath( xpath );
+      if ( href === "" ){
+        ods('not found:' + xpath );
+        return;
+      }
+      if ( ( h = d.getElementsByTagName( 'head' ) ) ) {
+        l = d.createElement( 'link' );
+        l.rel = type;
+        l.href = href;
+        h[ 0 ].appendChild( l );
+      }
+    }
+    function appendNext( xpath ) {
+      appendNavi( doc, 'next', xpath );
+    }
+    function appendPrev( xpath ){
+      appendNavi( doc, 'prev', xpath );
+    }
+    
     /* onmessage */
+    oex.onconnect = function( ev ) {
+      var msg = ev.data, src = ev.source;
+      src.postMessage( { 'cmd' : 'res', 'payload' : enc( loc ) } );
+    };
     oex.onmessage = function( ev ) {
-      var msg = ev.data, srv = ev.source, cmd = msg.cmd, payload = msg.payload;
+      var msg = ev.data, src = ev.source, cmd = msg.cmd, payload = msg.payload;
       ods( 'cmd:' + cmd ); ods( 'pay:' + payload );
       if ( cmd === 'req' ) {
-        srv.postMessage( { 'cmd' : 'res', 'payload' : enc( loc ) } );
+        src.postMessage( { 'cmd' : 'res', 'payload' : enc( loc ) } );
         return;
       }
       else if ( cmd === 'res' ) {
-        appendNext( payload.next );
+        var h = { 'next' : appendNext, 'prev' : appendPrev };
+        for ( var i in h ) if ( h.hasOwnProperty( i ) ) {
+          if ( !!payload[ i ] ) {
+            h[ i ]( payload[ i ] );
+          }
+        }
         return;
       }
     };
