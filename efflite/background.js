@@ -180,7 +180,11 @@
     oex.onconnect = function( ev ) {
       var msg = ev.data, src = ev.source;
       ods( 'msg:' + msg ); ods( 'src:' + src );
-      src.postMessage( { 'cmd' : 'req', 'payload' : 'send back url' } );
+      try{
+        src.postMessage( { 'cmd' : 'req', 'payload' : 'send back url' } );          
+      } catch (x) {
+        ods('onconnect:' + x );
+      }
     };
   }, false);
   
