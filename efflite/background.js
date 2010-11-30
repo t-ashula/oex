@@ -144,15 +144,16 @@
   }
   
   function getXPathForUrl( url ) {
-    var paths = {
-      'next' : '(//a[@rel="next"] or //a[contains(text(),"Next")])[last()]',
-      'prev' : '(//a[@rel="prev"] or //a[contains(text(),"Prev")])[last()]'
+    var paths = [], path = {
+      'next' : '(//a[@rel="next"])[last()]',
+      'prev' : '(//a[@rel="prev"])[last()]'
     }, i, info;
     for ( i = 0; info = SITEINFO[ i ]; ++i ){
       if ( url.match( info.url ) ) {
-        paths.next = info.nextLink;
-        paths.prev = info.prevLink ? info.prevLink : paths.prev;
-        break;
+        paths[ paths.length ] = {
+          'next' : info.nextLink ? info.nextLink : path.next,
+          'prev' : info.prevLink ? info.prevLink : path.prev
+        };
       }
     }
     return paths;
@@ -168,10 +169,8 @@
         paths = getXPathForUrl( dec( payload ) );
         src.postMessage( {
           'cmd':'res',
-          'payload': {
-            'next' : paths.next,
-            'prev' : paths.prev
-          }
+          /*          'payload': {            'next' : paths.next,            'prev' : paths.prev          }*/
+          'payload' : paths
         } );
         return;
       }

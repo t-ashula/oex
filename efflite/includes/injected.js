@@ -50,56 +50,56 @@
     }
     function getUrlFormXpath( xpath ){
       var url = $X( xpath );
-      ods( 'xpath:' + xpath ); ods( 'url:' + url + ';'  );
-      url = ( url instanceof Array ) ? url[ 0 ] : url;
-      return typeof url === 'string' ? url : "";
+      //ods( 'xpath:' + xpath ); ods( 'url:' + url + ';' + Object.prototype.toString.call( url ) );
+      url = ( url[ 0 ] ) ? url[ 0 ] : url;
+      return url.length < 7 ? "" : url;
     }
     function appendNavi( d, type, xpath ){
+      var href = getUrlFormXpath( xpath ), head = d.getElementsByTagName( 'head' ), l;
       if ( $X( './/head/link[@rel="' + type + '"]', d ) != false ){
-        ods('already exist');
-        return;
+        ods( 'already exist' );
+        return false;
       }      
-      var h, l, href = getUrlFormXpath( xpath );
       if ( href === "" ){
-        ods('not found:' + xpath );
-        return;
+        ods( 'not found:' + xpath );
+        return false;
       }
-      if ( ( h = d.getElementsByTagName( 'head' ) ) ) {
-        l = d.createElement( 'link' );
-        l.rel = type;
-        l.href = href;
-        h[ 0 ].appendChild( l );
+      if ( !head ) {
+        ods( 'no head?' );
+        return false;
       }
+
+      l = d.createElement( 'link' );
+      l.rel = type;
+      l.href = href;
+      head[ 0 ].appendChild( l );
+      return true;
     }
     function appendNext( xpath ) {
-      appendNavi( doc, 'next', xpath );
+      return appendNavi( doc, 'next', xpath );
     }
     function appendPrev( xpath ){
-      appendNavi( doc, 'prev', xpath );
+      return appendNavi( doc, 'prev', xpath );
     }
     
     /* onmessage */
-    oex.onconnect = function( ev ) {
+    /*oex.onconnect = function( ev ) {
       var msg = ev.data, src = ev.source;
       src.postMessage( { 'cmd' : 'res', 'payload' : enc( loc ) } );
-    };
+    };*/
     oex.onmessage = function( ev ) {
-      var msg = ev.data, src = ev.source, cmd = msg.cmd, payload = msg.payload;
+      var msg = ev.data, src = ev.source, cmd = msg.cmd, payload = msg.payload, i, info;
       //ods( 'cmd:' + cmd ); ods( 'pay:' + payload );
-      if ( cmd === 'req' ) {
-        src.postMessage( { 'cmd' : 'res', 'payload' : enc( loc ) } );
-        return;
-      }
-      else if ( cmd === 'res' ) {
-        var h = { 'next' : appendNext, 'prev' : appendPrev };
-        for ( var i in h ) if ( h.hasOwnProperty( i ) ) {
-          if ( !!payload[ i ] ) {
-            ods( 'location:' + loc );
-            ods( i + ':' + payload[i] );
-            h[ i ]( payload[ i ] );
-          }
+      switch( cmd ){
+       case 'req':
+        src.postMessage( { 'cmd' : 'res', 'payload' : enc( loc ) } );    
+        break;
+       case 'res':
+        for ( i = 0; info = payload[ i ]; ++i ) {
+          info.next && appendNext( info.next );
+          info.prev && appendPrev( info.prev );
         }
-        return;
+        break;
       }
     };
   }, false );
