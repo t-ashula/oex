@@ -13,7 +13,7 @@
         /**/ win.opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
       };
     })( 'efflite','injected.js' );
-    function isOwner(win){
+    function isOwner(){
       var res = true;
       try {
         res = win.top === win;
@@ -23,7 +23,7 @@
       }
       return res;
     }
-    if ( !isOwner(window) ){
+    if ( !isOwner() ){
       return;
     }
     // http://lowreal.net/logs/2006/03/16/1
@@ -83,10 +83,6 @@
     }
     
     /* onmessage */
-    /*oex.onconnect = function( ev ) {
-      var msg = ev.data, src = ev.source;
-      src.postMessage( { 'cmd' : 'res', 'payload' : enc( loc ) } );
-    };*/
     oex.onmessage = function( ev ) {
       var msg = ev.data, src = ev.source, cmd = msg.cmd, payload = msg.payload, i, info;
       //ods( 'cmd:' + cmd ); ods( 'pay:' + payload );
