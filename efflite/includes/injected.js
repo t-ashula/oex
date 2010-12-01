@@ -42,9 +42,9 @@
     function appendNavi( d, type, xpath ){
       var href = getUrlFormXpath( xpath ),
         head = d.getElementsByTagName( 'head' ), l;
-      if ( ( !head ) {
+      if ( ( !head ) 
            || (( head = head[ 0 ] ).querySelector( 'link[rel="' + type + '"]' ) != null ) 
-           || ( href === "" ) )
+           || ( href === "" ) ) {
         return false;
       }
       l = d.createElement( 'link' );
