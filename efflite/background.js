@@ -167,11 +167,7 @@
       //ods( 'cmd:' + cmd ); ods( 'pay:' + payload );
       if ( cmd === 'res' ) {
         paths = getXPathForUrl( dec( payload ) );
-        src.postMessage( {
-          'cmd':'res',
-          /*          'payload': {            'next' : paths.next,            'prev' : paths.prev          }*/
-          'payload' : paths
-        } );
+        src.postMessage( { 'cmd':'res', 'payload' : paths } );
         return;
       }
     };

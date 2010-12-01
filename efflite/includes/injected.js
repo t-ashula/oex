@@ -50,7 +50,6 @@
     }
     function getUrlFormXpath( xpath ){
       var url = $X( xpath );
-      //ods( 'xpath:' + xpath ); ods( 'url:' + url + ';' + Object.prototype.toString.call( url ) );
       url = ( url[ 0 ] ) ? url[ 0 ] : url;
       return url.length < 7 ? "" : url;
     }
@@ -83,10 +82,6 @@
     }
     
     /* onmessage */
-    /*oex.onconnect = function( ev ) {
-      var msg = ev.data, src = ev.source;
-      src.postMessage( { 'cmd' : 'res', 'payload' : enc( loc ) } );
-    };*/
     oex.onmessage = function( ev ) {
       var msg = ev.data, src = ev.source, cmd = msg.cmd, payload = msg.payload, i, info;
       //ods( 'cmd:' + cmd ); ods( 'pay:' + payload );
