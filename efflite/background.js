@@ -134,7 +134,8 @@
             item.prevLink = item.nextLink
               .replace( /"([^"\/]*)next([^"\/]*)"/g, rg( 'prev' ) )
               .replace( /"([^"\/]*)NEXT([^"\/]*)"/g, rg( 'PREV' ) )
-              .replace( /"([^"\/]*)Next([^"\/]*)"/g, rg( 'Prev' ) );
+              .replace( /"([^"\/]*)Next([^"\/]*)"/g, rg( 'Prev' ) )
+              .replace( /"([^"\/]*)>>([^"\/]*)"/g, rg( '<<' ) );
           }
         }
         ods( SITEINFO.length );          

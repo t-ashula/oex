@@ -54,9 +54,11 @@
       return true;
     }
     function appendNext( xpath ) {
+      ods('next:' + xpath );
       return appendNavi( doc, 'next', xpath );
     }
     function appendPrev( xpath ){
+      ods('prev:' + xpath );
       return appendNavi( doc, 'prev', xpath );
     }
     
