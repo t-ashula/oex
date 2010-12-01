@@ -26,27 +26,13 @@
     if ( !isOwner(window) ){
       return;
     }
-    // http://lowreal.net/logs/2006/03/16/1
-    function $X( x, context ) {
-      context = context || doc;
-      var exp = document.createExpression( x, function ( prefix ) {
-        var o = doc.createNSResolver( context )( prefix );
-        return o ? o : ( doc.contentType === "text/html" ) ? "" : "http://www.w3.org/1999/xhtml"; } ),
-        result = exp.evaluate( context, XPathResult.ANY_TYPE, null );
-      switch ( result.resultType ) {
-       case XPathResult.STRING_TYPE : return result.stringValue;
-       case XPathResult.NUMBER_TYPE : return result.numberValue;
-       case XPathResult.BOOLEAN_TYPE: return result.booleanValue;
-       case XPathResult.UNORDERED_NODE_ITERATOR_TYPE: {
-         result = exp.evaluate( context, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null );
-         var ret = [];
-         for ( var i = 0, len = result.snapshotLength; i < len ; ++i ) {
-           ret[ ret.length ] = result.snapshotItem( i );
-         }
-         return ret;
-       }
+    function $X( xpath, context ){
+      var result = doc.evaluate( xpath, doc, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null ),
+        len = result.snapshotLength, ret = [], i;
+      for ( i = 0; i < len; ++i ){
+        ret[ i ] = result.snapshotItem( i );
       }
-      return null;
+      return ret;
     }
     function getUrlFormXpath( xpath ){
       var url = $X( xpath );
@@ -54,24 +40,17 @@
       return url.length < 7 ? "" : url;
     }
     function appendNavi( d, type, xpath ){
-      var href = getUrlFormXpath( xpath ), head = d.getElementsByTagName( 'head' ), l;
-      if ( $X( './/head/link[@rel="' + type + '"]', d ) != false ){
-        ods( 'already exist' );
-        return false;
-      }      
-      if ( href === "" ){
-        ods( 'not found:' + xpath );
+      var href = getUrlFormXpath( xpath ),
+        head = d.getElementsByTagName( 'head' ), l;
+      if ( ( !head ) {
+           || (( head = head[ 0 ] ).querySelector( 'link[rel="' + type + '"]' ) != null ) 
+           || ( href === "" ) )
         return false;
       }
-      if ( !head ) {
-        ods( 'no head?' );
-        return false;
-      }
-
       l = d.createElement( 'link' );
       l.rel = type;
       l.href = href;
-      head[ 0 ].appendChild( l );
+      head.appendChild( l );
       return true;
     }
     function appendNext( xpath ) {
