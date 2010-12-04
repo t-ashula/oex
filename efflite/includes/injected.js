@@ -10,7 +10,7 @@
     /* output debug string */
     var ods = (function( pkg, name ){
       return function( msg ){
-        /**/ win.opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
+        /** win.opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
       };
     })( 'efflite','injected.js' );
     function isOwner(){
@@ -39,7 +39,7 @@
       url = ( url[ 0 ] ) ? url[ 0 ] : url;
       return url.length < 7 ? "" : url;
     }
-    function appendNavi( d, type, xpath ){
+    function appendNavi( d, type, xpath, doPrefetch ){
       var href = getUrlFormXpath( xpath ),
         head = d.getElementsByTagName( 'head' ), l;
       if ( ( !head ) 
@@ -49,17 +49,29 @@
       }
       l = d.createElement( 'link' );
       l.rel = type;
-      l.href = href;
+      l.href = ( href.href ) ? href.href : href;
       head.appendChild( l );
+
+      if ( doPrefetch ){
+        (function(url){
+          var iframe = d.createElement( 'iframe' );
+          d.body.appendChild( iframe );
+          iframe.src = url;
+          iframe.width = iframe.height = '1px';
+          iframe.onload = function(){
+            ods( 'prefetched:' + url );
+            d.body.removeChild( iframe );
+          };
+        })(href);
+      }
+      ods( 'appended;' + type + ':' + xpath );
       return true;
     }
     function appendNext( xpath ) {
-      ods('next:' + xpath );
-      return appendNavi( doc, 'next', xpath );
+      return appendNavi( doc, 'next', xpath, true );
     }
     function appendPrev( xpath ){
-      ods('prev:' + xpath );
-      return appendNavi( doc, 'prev', xpath );
+      return appendNavi( doc, 'prev', xpath, true );
     }
     
     /* onmessage */

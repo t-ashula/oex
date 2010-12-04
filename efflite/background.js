@@ -9,7 +9,7 @@
   /* output debug string */
   var ods = (function( pkg, name ){
     return function( msg ){
-      /**/ opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
+      /** opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
     };
   })( 'efflite','background.js' );
 
