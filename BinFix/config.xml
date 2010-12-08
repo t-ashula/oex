@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<widget xmlns="http://www.w3.org/ns/widgets">
+<widget 
+    xmlns="http://www.w3.org/ns/widgets"
+    version="1.0"
+    >
   <name>BinFix</name>
   <description>This extension attempts to correct wrong mime-typed content and reload them as original format.</description>
   <author href="http://ashula.info">t.ashula</author>
   <icon src="icons/binfix.png" />
-  <!-- icon source: http://openiconlibrary.sourceforge.net/gallery2/?./Icons/mimetypes/tango-style/image-x-generic.png -->
   <access origin="*" />
 </widget>
