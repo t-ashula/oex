@@ -28,13 +28,6 @@
   win.addEventListener( 'load', function () {
     var flooding = function(){
       var body = doc.body, head = doc.head;
-      ods(win.self);
-      ods(loc.pathname.match(/.(js|css|txt|html)$/));
-      ods(( head.children.length));
-      ods(( body.innerHTML.indexOf('\uFFFD')));
-      ods( body.children.length );
-      ods( body.firstChild.tagName );
-      ods( body.firstChild.innerHTML );
       return win == win.self
         && !loc.pathname.match(/.(js|css|txt|html)$/)
         && ( head && head.children.length === 0 )
@@ -79,7 +72,8 @@
     if ( flooding() ) {
       getHead( loc.href, function( bary ){
         if ( isImage( bary ) ) {
-          doc.body.innerHTML = '<p style="width:100%;margin:0 auto"><img src="' + loc.href + '" alt="" /></p>';
+          ods('isimage');
+          doc.body.innerHTML = '<div style="width:100%;margin:0 auto"><img src="' + loc.href + '" alt="" /></div>';
         } 
         else {
           doc.body.innerHTML = '<p><a href="' + loc.href +'">download</a></p>';
