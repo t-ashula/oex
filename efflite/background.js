@@ -9,7 +9,7 @@
   /* output debug string */
   var ods = (function( pkg, name ){
     return function( msg ){
-      /**/ opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
+      /** opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
     };
   })( 'efflite','background.js' );
 
@@ -135,7 +135,8 @@
               .replace( /"([^"\/]*)next([^"\/]*)"/g, rg( 'prev' ) )
               .replace( /"([^"\/]*)NEXT([^"\/]*)"/g, rg( 'PREV' ) )
               .replace( /"([^"\/]*)Next([^"\/]*)"/g, rg( 'Prev' ) )
-              .replace( /"([^"\/]*)>>([^"\/]*)"/g, rg( '<<' ) );
+              .replace( /"([^"\/]*)>>([^"\/]*)"/g, rg( '<<' ) )
+              .replace( /"([^"\/]*)≫([^"\/]*)"/g, rg( '≪' ) );
           }
         }
         ods( SITEINFO.length );          
@@ -153,7 +154,7 @@
     }
     ods('expats ;' + expats + typeof expats );
     for ( var i = 0, expat; expat = expats[ i ]; ++i ){
-      if ( url.match( expat ) ) {
+      if ( url.match( new RegExp( expat ) ) ) {
         return false;
       }
     }

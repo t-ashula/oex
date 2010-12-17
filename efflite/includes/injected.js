@@ -10,7 +10,7 @@
     /* output debug string */
     var ods = (function( pkg, name ){
       return function( msg ){
-        /**/ win.opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
+        /** win.opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
       };
     })( 'efflite','injected.js' );
     function isOwner(){
@@ -45,13 +45,13 @@
       if ( ( !head ) 
            || (( head = head[ 0 ] ).querySelector( 'link[rel="' + type + '"]' ) != null ) 
            || ( href === "" ) ) {
-        return false;
       }
-      l = d.createElement( 'link' );
-      l.rel = type;
-      l.href = ( href.href ) ? href.href : href;
-      head.appendChild( l );
-
+      else {
+        l = d.createElement( 'link' );
+        l.rel = type;
+        l.href = ( href.href ) ? href.href : href;
+        head.appendChild( l );
+      }
       ods('doPrefetch:' + doPrefetch );
       if ( doPrefetch ){
         (function(url){

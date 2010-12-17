@@ -6,7 +6,7 @@
   /* output debug string */
   var ods = (function( pkg, name ){
     return function( msg ){
-      /**/ opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
+      /** opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
     };
   })( 'efflite','opt.js' ),
     ins = function(o){ for( var i in o){ ods(o + '[' + i + '] =' + o[i]); } };
@@ -41,49 +41,55 @@
 
   var kExcludeKey = 'EFFExclude';
   var kNewPatternKey = 'newexpat';  
-  function addnewexurl(){
-    var nexs = [], exs = doc.querySelectorAll('#' + kExcludeKey + '> ul > li'), newpat = doc.getElementById(kNewPatternKey).value;
-    for ( var i = 0, ex; ex = exs[ i ]; ++i ){
-      if ( ex.getElementsByTagName( 'input' )[ 0 ].checked ) {
-        nexs.push( dec( ex.value ) );
-        ods( nexs[ nexs.length ] );
-      }
-    }
-    ods( 'nexs' + nexs.length );
-    ods('neqpat<' + newpat + '>');
-    if ( !!newpat ) {
-      nexs[ nexs.length ] = newpat;
-    }
-    ods( JSON.stringify(nexs));
-    sss.setItem(kExcludeKey, JSON.stringify(nexs));
-    createExcludSection();
-  }
   function createExcludSection(){
-    var excludes = JSON.parse( sss.getItem(kExcludeKey) ) || ['/twitter\.com$/', '/tumblr\.com$/'];
-    ods(excludes);
-    var sec = Q.dom.div( { 'id': kExcludeKey }, Q.dom.h1( {}, '@exclude') );
-    var list = Q.dom.ul(), id, tmp;
+    var excludes = JSON.parse( sss.getItem(kExcludeKey) ) || ['twitter.com', 'tumblr.com'];
+    var list = Q.dom.ul(), id, tmp, sec;
     for (var i = 0, ex; ex = excludes[i];++i){
       id = 'exurl' + i;
       list.appendChild(
         Q.dom.li(
           {},
-          Q.dom.input( { 'id': id, 'checked' : 'checked', 'type' : 'checkbox', 'value' : enc(ex) } ),
+          Q.dom.input( { 'id': id, 'type' : 'checkbox', 'value' : enc(ex), 'checked' : 'checked' } ),
           Q.dom.label( { 'for' : id }, ex )
         )
       );
     }
-    sec.appendChild(list);
     var frm = Q.dom.form(
       { 'id' : 'addexclude', 'action' : '' },
+      list,
       Q.dom.input( { 'type':'text', 'id': kNewPatternKey } ),
       Q.dom.input( { 'type':'submit', 'id':'addnewex' }, 'Update' )
     );
-    frm.addEventListener( 'submit', function(){ addnewexurl();}, false );
-    sec.appendChild(frm);
+    frm.addEventListener(
+      'submit',
+      function (ev){
+        var nexs = [], exs = doc.getElementById( kExcludeKey ),
+          newpat = doc.getElementById( kNewPatternKey ).value, checked;
+        exs = exs.getElementsByTagName('li');
+        ods(exs);
+        for ( var i = 0, ex, ii; ex = exs.item( i ); ++i ){
+          ii = ex.getElementsByTagName( 'input' ).item( 0 );
+          if ( ii.checked ) {
+            nexs.push( dec( ii.value ) );
+            ods( nexs[ nexs.length ] );
+          }
+        }
+        ods( 'nexs' + nexs.length );
+        ods('neqpat<' + newpat + '>');
+        if ( !!newpat ) {
+          nexs[ nexs.length ] = newpat;
+        }
+        ods( JSON.stringify(nexs));
+        sss.setItem(kExcludeKey, JSON.stringify(nexs));
+        createExcludSection();
+        ev.preventDefault();
+      },
+      false );
+    sec = Q.dom.div( { 'id': kExcludeKey }, Q.dom.h1( {}, '@exclude'), frm );
     if (( tmp = doc.getElementById(kExcludeKey) ) ) {
       body.replaceChild( sec, tmp );
-    } else{
+    }
+    else {
       body.appendChild(sec);
     }
   }
