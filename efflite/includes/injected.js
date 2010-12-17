@@ -10,7 +10,7 @@
     /* output debug string */
     var ods = (function( pkg, name ){
       return function( msg ){
-        /** win.opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
+        /*__DEBUG__* win.opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
       };
     })( 'efflite','injected.js' );
     function isOwner(){
@@ -42,43 +42,58 @@
     function appendNavi( d, type, xpath, doPrefetch ){
       var href = getUrlFormXpath( xpath ),
         head = d.getElementsByTagName( 'head' ), l;
-      if ( ( !head ) 
-           || (( head = head[ 0 ] ).querySelector( 'link[rel="' + type + '"]' ) != null ) 
-           || ( href === "" ) ) {
+      if ( ( !head ) ) {
+          return false;
       }
-      else {
-        l = d.createElement( 'link' );
-        l.rel = type;
-        l.href = ( href.href ) ? href.href : href;
-        head.appendChild( l );
+      if (  href === "" )  {
+        return false;
       }
-      ods('doPrefetch:' + doPrefetch );
-      if ( doPrefetch ){
-        (function(url){
-          var iframe = d.createElement( 'iframe' );
-          d.body.appendChild( iframe );
-          iframe.src = url;
-          iframe.width = iframe.height = '1px';
-          iframe.onload = function(){
-            ods( 'prefetched:' + url );
-            d.body.removeChild( iframe );
-          };
-        })(href);
+      if( ( head = head[ 0 ] ) && head.querySelector( 'link[rel="' + type + '"]' ) != null ) {
+        ods( 'exists.' );
+        return false;
       }
+      l = d.createElement( 'link' );
+      l.rel = type;
+      l.href = ( href.href ) ? href.href : href;
+      head.appendChild( l );
       ods( 'appended;' + type + ':' + xpath );
       return true;
     }
 
-    function appendNext( xpath, pref ) {
-      return appendNavi( doc, 'next', xpath, pref );
+    function appendNext( xpath ) {
+      return appendNavi( doc, 'next', xpath );
     }
-    function appendPrev( xpath, pref ){
-      return appendNavi( doc, 'prev', xpath, pref );
+    function appendPrev( xpath ) {
+      return appendNavi( doc, 'prev', xpath );
     }
-    
+
+    function prefetch( d, type ){
+      var href = d.head.querySelector( 'link[rel="' + type + '"]' );
+      if ( !!href ){
+        href = href.href;
+      }
+      else {
+        return;
+      }
+      var iframe = d.createElement( 'iframe' );
+      d.body.appendChild( iframe );
+      iframe.src = href;
+      iframe.width = iframe.height = '1px';
+      iframe.onload = function(){
+        ods( 'prefetched:' + href );
+        d.body.removeChild( iframe );
+      };
+    }
+
+    function prefetchNext(){
+      prefetch( doc, 'next' );
+    }
+    function prefetchPrev(){
+      prefetch( doc, 'prev' );
+    }
     /* onmessage */
     oex.onmessage = function( ev ) {
-      var msg = ev.data, src = ev.source, cmd = msg.cmd, payload = msg.payload, i, path, paths, prefetch;
+      var msg = ev.data, src = ev.source, cmd = msg.cmd, payload = msg.payload, i, path, paths, dopref;
       //ods( 'cmd:' + cmd ); ods( 'pay:' + payload );
       switch( cmd ){
        case 'req':
@@ -86,10 +101,15 @@
         break;
        case 'res':
         paths = payload.paths;
-        prefetch = payload.doPrefetch;
+        dopref = payload.doPrefetch;
         for ( i = 0; path = paths[ i ]; ++i ) {
-          path.next && appendNext( path.next, prefetch );
-          path.prev && appendPrev( path.prev, prefetch );
+          path.next && appendNext( path.next );
+          path.prev && appendPrev( path.prev );
+        }
+        if ( dopref ){
+          ods('doPrefetch:' + dopref );
+          prefetchNext( );
+          prefetchPrev( );
         }
         break;
       }

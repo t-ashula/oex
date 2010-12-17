@@ -9,7 +9,7 @@
   /* output debug string */
   var ods = (function( pkg, name ){
     return function( msg ){
-      /** opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
+      /*__DEBUG__ opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
     };
   })( 'efflite','background.js' );
 
@@ -148,10 +148,8 @@
  
   var kExcludeKey = 'EFFExclude';
   function getDoPrefetch( url ){
-    var expats = sss.getItem(kExcludeKey);
-    if ( !!expats ) {
-      expats = JSON.parse(expats);
-    }
+    var expats = sss.getItem( kExcludeKey );
+    expats = expats ? JSON.parse(expats) : ['twitter.com/', 'www.tumblr.com/'];
     ods('expats ;' + expats + typeof expats );
     for ( var i = 0, expat; expat = expats[ i ]; ++i ){
       if ( url.match( new RegExp( expat ) ) ) {
@@ -182,7 +180,6 @@
     /* onmessage */
     oex.onmessage = function( ev ) {
       var msg = ev.data, src = ev.source, cmd = msg.cmd, payload = msg.payload, url, paths, prefetch;
-      //ods( 'cmd:' + cmd ); ods( 'pay:' + payload );
       if ( cmd === 'res' ) {
         url = dec( payload );
         paths = getXPathForUrl( url );
@@ -196,7 +193,8 @@
       //ods( 'msg:' + msg ); ods( 'src:' + src );
       try{
         src.postMessage( { 'cmd' : 'req', 'payload' : 'send back url' } );          
-      } catch (x) {
+      }
+      catch (x) {
         ods('onconnect:' + x );
       }
     };

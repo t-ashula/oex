@@ -6,7 +6,7 @@
   /* output debug string */
   var ods = (function( pkg, name ){
     return function( msg ){
-      /** opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
+      /*__DEBUG__* opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
     };
   })( 'efflite','opt.js' ),
     ins = function(o){ for( var i in o){ ods(o + '[' + i + '] =' + o[i]); } };
@@ -42,7 +42,7 @@
   var kExcludeKey = 'EFFExclude';
   var kNewPatternKey = 'newexpat';  
   function createExcludSection(){
-    var excludes = JSON.parse( sss.getItem(kExcludeKey) ) || ['twitter.com', 'tumblr.com'];
+    var excludes = JSON.parse( sss.getItem( kExcludeKey ) ) || ['twitter.com/', 'www.tumblr.com/'];;
     var list = Q.dom.ul(), id, tmp, sec;
     for (var i = 0, ex; ex = excludes[i];++i){
       id = 'exurl' + i;
@@ -71,11 +71,8 @@
           ii = ex.getElementsByTagName( 'input' ).item( 0 );
           if ( ii.checked ) {
             nexs.push( dec( ii.value ) );
-            ods( nexs[ nexs.length ] );
           }
         }
-        ods( 'nexs' + nexs.length );
-        ods('neqpat<' + newpat + '>');
         if ( !!newpat ) {
           nexs[ nexs.length ] = newpat;
         }
@@ -85,7 +82,7 @@
         ev.preventDefault();
       },
       false );
-    sec = Q.dom.div( { 'id': kExcludeKey }, Q.dom.h1( {}, '@exclude'), frm );
+    sec = Q.dom.div( { 'id': kExcludeKey }, Q.dom.h1( {}, 'prefetch @exclude'), frm );
     if (( tmp = doc.getElementById(kExcludeKey) ) ) {
       body.replaceChild( sec, tmp );
     }
