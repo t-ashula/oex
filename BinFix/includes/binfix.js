@@ -3,10 +3,31 @@
 // @author t.ashula
 // @namespace http://ashula.info/
 // ==/UserScript==
-opera.postError('binfix.js');
-(function( win, loc, doc ){
-  opera.postError('function(w,l,c){}()');
-  win.addEventListener( 'load', function () {
+
+(function(){
+  window.addEventListener( 'load', function () {
+  /* aliases */
+  var win = window, loc = win.location, doc = win.document, oex = opera.extension;
+  /* output debug string */
+  var ods = (function( pkg, name ){
+    return function( msg ){
+      /**/ win.opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
+    };
+  })( 'Binfix','binfix.js' );
+  function isOwner(){
+    var res = true;
+    try {
+      res = win.top === win;
+    }
+    catch (x) {
+      res = false;
+    }
+    return res;
+  }
+  if ( !isOwner() ){
+    return;
+  }
+  ods( loc );
     var flooding = function(){
       return win == win.self
         && !loc.pathname.match(/.(js|css|txt|html)$/)
@@ -41,11 +62,13 @@ opera.postError('binfix.js');
       getHead( loc.href, function( bary ){
         if ( isImage( bary ) ) {
           doc.body.innerHTML = '<img src="' + loc.href + '" alt="" />';
+          ods( 'fixed as image' );
         } 
         else {
           doc.body.innerHTML = '<p><a href="' + loc.href +'">download</a></p>';
+          ods( 'fixed as file' );
         }
       });
     }/* */
   }, false );
-})( window, window.location, document );
+})();
