@@ -10,7 +10,7 @@
     /* output debug string */
     var ods = (function( pkg, name ){
       return function( msg ){
-        /** win.opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
+        /**/ win.opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
       };
     })( 'efflite','injected.js' );
     function isOwner(){
@@ -53,6 +53,7 @@
       l.href = ( href.href ) ? href.href : href;
       head.appendChild( l );
 
+      ods('doPrefetch:' + doPrefetch );
       if ( doPrefetch ){
         (function(url){
           var iframe = d.createElement( 'iframe' );
@@ -68,25 +69,28 @@
       ods( 'appended;' + type + ':' + xpath );
       return true;
     }
-    function appendNext( xpath ) {
-      return appendNavi( doc, 'next', xpath, true );
+
+    function appendNext( xpath, pref ) {
+      return appendNavi( doc, 'next', xpath, pref );
     }
-    function appendPrev( xpath ){
-      return appendNavi( doc, 'prev', xpath, true );
+    function appendPrev( xpath, pref ){
+      return appendNavi( doc, 'prev', xpath, pref );
     }
     
     /* onmessage */
     oex.onmessage = function( ev ) {
-      var msg = ev.data, src = ev.source, cmd = msg.cmd, payload = msg.payload, i, info;
+      var msg = ev.data, src = ev.source, cmd = msg.cmd, payload = msg.payload, i, path, paths, prefetch;
       //ods( 'cmd:' + cmd ); ods( 'pay:' + payload );
       switch( cmd ){
        case 'req':
         src.postMessage( { 'cmd' : 'res', 'payload' : enc( loc ) } );    
         break;
        case 'res':
-        for ( i = 0; info = payload[ i ]; ++i ) {
-          info.next && appendNext( info.next );
-          info.prev && appendPrev( info.prev );
+        paths = payload.paths;
+        prefetch = payload.doPrefetch;
+        for ( i = 0; path = paths[ i ]; ++i ) {
+          path.next && appendNext( path.next, prefetch );
+          path.prev && appendPrev( path.prev, prefetch );
         }
         break;
       }

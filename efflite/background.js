@@ -3,13 +3,13 @@
  */
 (function(){
   /* aliases */
-  var win = window, loc = win.location,
+  var win = window, loc = win.location, sss = win.localStorage,
     doc = win.document, oex = opera.extension,
-    enc = win.enodeURIComponent, dec = win.decodeURIComponent, JSON = win.JSON;
+    enc = win.encodeURIComponent, dec = win.decodeURIComponent, JSON = win.JSON;
   /* output debug string */
   var ods = (function( pkg, name ){
     return function( msg ){
-      /** opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
+      /**/ opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
     };
   })( 'efflite','background.js' );
 
@@ -144,6 +144,22 @@
     xhr.send( null );
   }
   
+ 
+  var kExcludeKey = 'EFFExclude';
+  function getDoPrefetch( url ){
+    var expats = sss.getItem(kExcludeKey);
+    if ( !!expats ) {
+      expats = JSON.parse(expats);
+    }
+    ods('expats ;' + expats + typeof expats );
+    for ( var i = 0, expat; expat = expats[ i ]; ++i ){
+      if ( url.match( expat ) ) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   function getXPathForUrl( url ) {
     var paths = [], path = {
       'next' : '(//a[@rel="next"])[last()]',
@@ -164,11 +180,13 @@
     updateEffSiteinfo();
     /* onmessage */
     oex.onmessage = function( ev ) {
-      var msg = ev.data, src = ev.source, cmd = msg.cmd, payload = msg.payload, paths;
+      var msg = ev.data, src = ev.source, cmd = msg.cmd, payload = msg.payload, url, paths, prefetch;
       //ods( 'cmd:' + cmd ); ods( 'pay:' + payload );
       if ( cmd === 'res' ) {
-        paths = getXPathForUrl( dec( payload ) );
-        src.postMessage( { 'cmd':'res', 'payload' : paths } );
+        url = dec( payload );
+        paths = getXPathForUrl( url );
+        prefetch = getDoPrefetch( url );
+        src.postMessage( { 'cmd':'res', 'payload' : { 'paths' : paths, 'doPrefetch' : prefetch } } );
         return;
       }
     };
