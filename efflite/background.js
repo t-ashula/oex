@@ -9,7 +9,7 @@
   /* output debug string */
   var ods = (function( pkg, name ){
     return function( msg ){
-      /*__DEBUG__ opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
+      /*__DEBUG__* opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
     };
   })( 'efflite','background.js' );
 
@@ -127,17 +127,20 @@
         }
         SITEINFO = tmp.length > old.length ? tmp : old;
         function rg (q){
-          return function(s,p1,p2){ return '"' + p1 + q + p2 + '"';};
+          return function( s, p1, p2 ){
+            return '"' + p1 + q + p2 + '"';
+          };
         }
         for ( i = 0; item = SITEINFO[ i ]; ++i ) {
-          if ( item.nextLink.match( /"(.*)next(.*)"/ig ) ) {
-            item.prevLink = item.nextLink
-              .replace( /"([^"\/]*)next([^"\/]*)"/g, rg( 'prev' ) )
-              .replace( /"([^"\/]*)NEXT([^"\/]*)"/g, rg( 'PREV' ) )
-              .replace( /"([^"\/]*)Next([^"\/]*)"/g, rg( 'Prev' ) )
-              .replace( /"([^"\/]*)>>([^"\/]*)"/g, rg( '<<' ) )
-              .replace( /"([^"\/]*)≫([^"\/]*)"/g, rg( '≪' ) );
-          }
+          item.prevLink = item.nextLink
+            .replace( /"([^"\/]*)next([^"\/]*)"/g, rg( 'prev' ) )
+            .replace( /"([^"\/]*)NEXT([^"\/]*)"/g, rg( 'PREV' ) )
+            .replace( /"([^"\/]*)Next([^"\/]*)"/g, rg( 'Prev' ) )
+            .replace( /"([^"\/]*)>>([^"\/]*)"/g, rg( '<<' ) )
+            .replace( /"([^"\/]*)≫([^"\/]*)"/g, rg( '≪' ) )
+            .replace( /"([^"\/]*)»([^"\/]*)"/g, rg( '«' ) )
+            .replace( /"([^"\/]*)次([^"\/]*)"/g, rg( '前' ) )
+            ;
         }
         ods( SITEINFO.length );          
       }

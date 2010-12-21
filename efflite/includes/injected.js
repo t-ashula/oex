@@ -45,7 +45,7 @@
       if ( ( !head ) ) {
           return false;
       }
-      if (  href === "" )  {
+      if ( href === "" )  {
         return false;
       }
       if( ( head = head[ 0 ] ) && head.querySelector( 'link[rel="' + type + '"]' ) != null ) {
