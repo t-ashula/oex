@@ -69,13 +69,24 @@
       })( ba );
       return isJpeg || isPng;
     };
+    var isFile = function( ba ) {
+      var isPDF = (function( b ){
+        var h = b.getBytes( 0, 5 ), s = String.fromCharCode( h[0], h[1], h[2], h[3], h[4] );
+        ods( s );
+        return s  === '%PDF-';
+      })( ba );
+      return isPDF;
+    };
     if ( flooding() ) {
       getHead( loc.href, function( bary ){
         if ( isImage( bary ) ) {
-          ods('isimage');
           doc.body.innerHTML = '<div style="width:100%;margin:0 auto"><img src="' + loc.href + '" alt="" /></div>';
           ods( 'fixed as image' );
-        } 
+        }
+        else if ( isFile( bary ) ) {
+          ods('isFile');
+          doc.body.innerHTML = '<p><a href="' + loc.href +'" hreftype="application/pdf">download</a></p>';          
+        }
         else {
           doc.body.innerHTML = '<p><a href="' + loc.href +'">download</a></p>';
           ods( 'fixed as file' );

@@ -111,7 +111,7 @@
     xhr.open( 'GET', SITEINFOURI );
     xhr.onreadystatechange = function(){
       if ( xhr.readyState === 4 && xhr.status === 200 ){
-        var tmp = [], old = SITEINFO, item, i;
+        var tmp = [], old = SITEINFO, item, i, prev;
         for ( i = 0; item = localSITEINFO[ i ]; ++i ) {
           tmp[ tmp.length ] = { 'url' : item.url, 'nextLink' : item.nextLink };
         }
@@ -132,7 +132,8 @@
           };
         }
         for ( i = 0; item = SITEINFO[ i ]; ++i ) {
-          item.prevLink = item.nextLink
+          prev = item.nextLink
+            .replace( /"([^"\/]*)pagN([^"\/]*)"/g, rg( 'pagP' ) )
             .replace( /"([^"\/]*)next([^"\/]*)"/g, rg( 'prev' ) )
             .replace( /"([^"\/]*)NEXT([^"\/]*)"/g, rg( 'PREV' ) )
             .replace( /"([^"\/]*)Next([^"\/]*)"/g, rg( 'Prev' ) )
@@ -141,6 +142,9 @@
             .replace( /"([^"\/]*)»([^"\/]*)"/g, rg( '«' ) )
             .replace( /"([^"\/]*)次([^"\/]*)"/g, rg( '前' ) )
             ;
+          if ( prev != item.nextLink ) {
+            item.prevLink = prev;
+          }
         }
         ods( SITEINFO.length );          
       }
@@ -151,10 +155,10 @@
  
   var kExcludeKey = 'EFFExclude';
   function getDoPrefetch( url ){
-    var expats = sss.getItem( kExcludeKey );
-    expats = expats ? JSON.parse(expats) : ['twitter.com/', 'www.tumblr.com/'];
+    var expats = sss.getItem( kExcludeKey ), expat, i;
+    expats = expats ? JSON.parse( expats ) : ['twitter.com/', 'www.tumblr.com/'];
     ods('expats ;' + expats + typeof expats );
-    for ( var i = 0, expat; expat = expats[ i ]; ++i ){
+    for ( i = 0; expat = expats[ i ]; ++i ){
       if ( url.match( new RegExp( expat ) ) ) {
         return false;
       }

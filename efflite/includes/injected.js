@@ -49,7 +49,6 @@
         return false;
       }
       if( ( head = head[ 0 ] ) && head.querySelector( 'link[rel="' + type + '"]' ) != null ) {
-        ods( 'exists.' );
         return false;
       }
       l = d.createElement( 'link' );
@@ -57,6 +56,7 @@
       l.href = ( href.href ) ? href.href : href;
       head.appendChild( l );
       ods( 'appended;' + type + ':' + xpath );
+      //ods( win.XPathEvaluator );
       return true;
     }
 
@@ -64,6 +64,7 @@
       return appendNavi( doc, 'next', xpath );
     }
     function appendPrev( xpath ) {
+      ods('prev;' + xpath );
       return appendNavi( doc, 'prev', xpath );
     }
 
