@@ -67,13 +67,16 @@
           out[ out.length ] = b64ces[ d2 | u3 ];
           out[ out.length ] = b64ces[ d3 ];
         }
-        return out.join('');
+        return out.join( '' );
       };
+    };
+    var baToStr = function( ba ) {
+      return ba.map( function( e ){ return String.fromCharCode( e ); } ).join( '' );
     };
     var memcmp = function( lhs, rhs ) {
       var i, l;
-      for ( i = 0, l = lhs.length; i < l; ++i ){
-        if ( lhs[ i ] !== rhs[ i ] ){
+      for ( i = 0, l = lhs.length; i < l; ++i ) {
+        if ( lhs[ i ] !== rhs[ i ] ) {
           return false;
         }
       }
@@ -86,75 +89,104 @@
       xhr.setRequestHeader( 'Range', 'bytes=0-50' );
       xhr.overrideMimeType( 'text/plain; charset=x-user-defined' );
       xhr.send( null );
-      xhr.onreadystatechange = function(){
+      xhr.onreadystatechange = function() {
         var xcto = void 0;
         try{
           if ( xhr.readyState === 2 ){
             ns = ( ( xcto = xhr.getResponseHeader( XCTO ) ) && xcto.match( /nosnif/i ) );
           }
-        } catch (x) {
         }
-        if ( xhr.readyState === 4 && xhr.status === 200 ){
+        catch (x) {
+        }
+        if ( xhr.readyState === 4 && xhr.status === 200 ) {
           cb( new binarray( xhr.responseText ), ns );
         }
       };
     };
-    
+    var T = function( e ) {
+      return doc.createTextNode( e );
+    };
+    var N = function() {
+      var args = arguments, l = args.length, e = doc.createElement( args[ 0 ] ), as, k;
+      if ( l > 1 ) {
+        as = args[ 1 ];
+        for ( k in as ) {
+          if ( as.hasOwnProperty( k ) ) {
+            e.setAttribute( k, as[ k ] );
+          }
+        }
+        for ( k = 2; k < l; ++k ) {
+          e.appendChild( args[ k ] );
+        }
+      }
+      return e;
+    };
     var handlers = {
-      'image/' : function( type, bary, ns ){
+      'image' : function( type, bary, ns ){
         if ( !!ns ) {
-          handlers['application/octet-stream']( type, bary, true );
+          handlers[ 'unknown' ]( type, bary, true );
         }
         else {
-          doc.body.innerHTML = '<div style="width:100%;margin:0 auto">'
-            + '<img src="' + loc.href + '" alt="" />' + '<p>' + type + '</p>' + '</div>';            
+          doc.body.innerHTML = '';
+          doc.body.appendChild(
+            N( 'div', { 'style' : "width:100%;margin:0 auto" },
+               N( 'img', { 'src' : loc.href, 'alt': "" } ),
+               N( 'p', {}, T( type ) )));
         }
       }
-      ,'application/pdf' : function ( type, bary, ns ) {
+      ,'application' : function ( type, bary, ns ) {
         if ( !!ns ) {
-          handlers['application/octet-stream']( type, bary, true );
+          handlers[ 'unknown' ]( type, bary, true );
         }
         else {
-          var b = doc.createElement('button');
-          b.appendChild( doc.createTextNode('Open') );
+          doc.body.innerHTML = '';
+          var b = N( 'button', {}, T( 'Open' ) );
           b.addEventListener( 'click', function(){ win.location = 'data:' + type + ';base64,' + bary.toBase64(); }, false );
-          doc.body.innerHTML = '<p> BinFix extension detect ' + type + ' file </p>';
-          doc.body.innerHTML += '<p><a href="' + loc.href +'">download (right click and "Save content as")</a></p>';
-          doc.body.innerHTML += '<p> this button does not work if open ' + type + ' file with plugin.</p>';
-          doc.body.appendChild( b );            
+          doc.body.appendChild(
+            N( 'div', {},
+              N( 'p', {}, T( 'BinFix extension detect ' + type + ' file.' ) ),
+              N( 'p', {}, N( 'a', { 'href' : loc.href }, T( 'download (right click and "Save content as")' ) ) ),
+              N( 'p', {}, T( 'this button does not work properly if open ' + type + ' file with plugin.' ) ),
+              b
+             )
+          );
         }
       }
-      ,'application/octet-stream' : function ( type, bary, ns ){
+      ,'unknown' : function ( type, bary, ns ){
         doc.body.innerHTML = '';
         if ( !!ns ) {
-          doc.body.innerHTML += '<p><strong style="color:red">HTTP response contains ' + XCTO + ':nosniff. So one stop content-type fix.</strong></p>';
+          doc.body.appendChild(
+            N( 'p', {}, N( 'strong', {}, T( 'HTTP response contains ' + XCTO + ':nosniff. So stop content-type fix.' ) ) ) );
         }
-        doc.body.innerHTML += '<p><a href="' + loc.href +'">download (right click and "Save content as")</a></p>';
-        var p = doc.createElement('pre');
-        p.appendChild( doc.createTextNode( bary.data ) );
+        doc.body.appendChild(
+          N( 'p', {},
+            N( 'p', {}, N( 'a', { 'href' : loc.href }, T( 'download (right click and "Save content as")' ) ) ) ) );
+        var p = N( 'pre', {}, T( bary.data ) );
         doc.body.appendChild( p );
       }
     };
-    handlers[ 'image/png' ] = handlers[ 'image/gif' ] = handlers[ 'image/jpeg' ] = handlers[ 'image/' ];
-    handlers[ 'application/x-rar-compressed' ] = handlers[ 'application/pdf' ];
-    var baToStr = function( ba ){
-      var s = '', i, l;
-      for ( i = 0, l = ba.length; i < l; ++i ){
-        s += String.fromCharCode( ba[ i ] );
+    (function(){
+      var q = { 'image' : [ 'png', 'gif', 'jpeg' ] ,
+                'application' : [ 'pdf','x-rar-compressed','x-msdos-program', 'x-msdownload' ] }, i;
+      for (i in q) {
+        if ( q.hasOwnProperty( i ) ){
+          q[ i ].forEach( function( t ) { handlers[ i + '/' + t ] = handlers[ i ]; } );
+        }
       }
-      return s;
-    };
+    })();
     var guessType = function( ba ){
-      return (function( b, h ){ h = b.getBytes( 0, 2 ); return memcmp( h, [ 0xff, 0xd8 ] ); })( ba ) ? 'image/jpeg' :
+      return (function( b, h ){ h = b.getBytes( 0, 2 ); return memcmp( h, [ 0xff, 0xd8 ] ); })( ba )         ? 'image/jpeg' :
         (function( b, h ) { h = b.getBytes( 0, 4 ); return memcmp( h, [ 0x89, 0x50, 0x4e, 0x47 ] ); })( ba ) ? 'image/png' :
-        (function( b, h ) { h = b.getBytes( 0, 4 ); return baToStr( h ) === 'GIF8'; })( ba )  ? 'image/gif' :
-        (function( b, h ) { h = b.getBytes( 0, 5 ); return baToStr( h ) === '%PDF-'; })( ba ) ? 'application/pdf' :
-        (function( b, h ) { h = b.getBytes( 0, 4 ); return baToStr( h ) === 'Rar!' || memcmp( h, [ 0x52, 0x45, 0x7e, 0x5e]); })( ba ) ? 'application/x-rar-compressed' :
-        'application/octet-stream';
+        (function( b, h ) { h = b.getBytes( 0, 4 ); return baToStr( h ) === 'GIF8'; })( ba )                 ? 'image/gif' :
+        (function( b, h ) { h = b.getBytes( 0, 2 ); return baToStr( h ) === 'MZ'; })( ba )                   ? 'application/x-msdos-program' :
+        (function( b, h ) { h = b.getBytes( 0, 2 ); return baToStr( h ) === 'MZ'; })( ba )                   ? 'application/x-msdownload' :
+        (function( b, h ) { h = b.getBytes( 0, 5 ); return baToStr( h ) === '%PDF-'; })( ba )                ? 'application/pdf' :        
+        (function( b, h ) { h = b.getBytes( 0, 4 ); return baToStr( h ) === 'Rar!' || memcmp( h, [ 0x52, 0x45, 0x7e, 0x5e ] ); })( ba ) ? 'application/x-rar-compressed' :
+        'unknown';
     };
     if ( flooding() ) {
       getHead( loc.href, function( bary, nosniff ){
-        var type = guessType( bary ), handler = handlers[ type ] || handlers[ 'application/octet-stream' ];
+        var type = guessType( bary ), handler = handlers[ type ] || handlers[ 'unknown' ];
         ods( ['type:', type, 'nosniff:', !!nosniff ] );
         handler( type, bary, nosniff );
       });
