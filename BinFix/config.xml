@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <widget 
     xmlns="http://www.w3.org/ns/widgets"
-    version="1.1"
+    version="1.2"
     >
   <name>BinFix</name>
   <description>This extension attempts to correct wrong mime-typed content and reload them as original format.</description>

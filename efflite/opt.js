@@ -40,23 +40,22 @@
   })();
 
   var kExcludeKey = 'EFFExclude';
-  var kNewPatternKey = 'newexpat';  
-  function createExcludSection(){
-    var excludes = JSON.parse( sss.getItem( kExcludeKey ) ) || ['twitter.com/', 'www.tumblr.com/'];;
-    var list = Q.dom.ul(), id, tmp, sec;
-    for (var i = 0, ex; ex = excludes[i];++i){
-      id = 'exurl' + i;
-      list.appendChild(
-        Q.dom.li(
-          {},
-          Q.dom.input( { 'id': id, 'type' : 'checkbox', 'value' : enc(ex), 'checked' : 'checked' } ),
-          Q.dom.label( { 'for' : id }, ex )
-        )
-      );
-    }
+  var kNewPatternKey = 'newexpat';
+  function createExcludSection() {
+    var excludes = JSON.parse( sss.getItem( kExcludeKey ) ) || [ 'twitter.com/', 'www.tumblr.com/' ], sec, tmp;
     var frm = Q.dom.form(
       { 'id' : 'addexclude', 'action' : '' },
-      list,
+      Q.dom.ul(
+        {},
+        excludes.map( function(i) {
+          var id = 'exurl' + i;
+          return Q.dom.li(
+            {},
+            Q.dom.input( { 'id': id, 'type' : 'checkbox', 'value' : enc( ex ), 'checked' : 'checked' } ),
+            Q.dom.label( { 'for' : id }, ex )
+          );
+        })
+      ),
       Q.dom.input( { 'type':'text', 'id': kNewPatternKey } ),
       Q.dom.input( { 'type':'submit', 'id':'addnewex' }, 'Update' )
     );
@@ -65,8 +64,7 @@
       function (ev){
         var nexs = [], exs = doc.getElementById( kExcludeKey ),
           newpat = doc.getElementById( kNewPatternKey ).value, checked;
-        exs = exs.getElementsByTagName('li');
-        ods(exs);
+        exs = exs.getElementsByTagName( 'li' );
         for ( var i = 0, ex, ii; ex = exs.item( i ); ++i ){
           ii = ex.getElementsByTagName( 'input' ).item( 0 );
           if ( ii.checked ) {
@@ -76,18 +74,18 @@
         if ( !!newpat ) {
           nexs[ nexs.length ] = newpat;
         }
-        ods( JSON.stringify(nexs));
-        sss.setItem(kExcludeKey, JSON.stringify(nexs));
+        ods( JSON.stringify( nexs ) );
+        sss.setItem( kExcludeKey, JSON.stringify( nexs ) );
         createExcludSection();
         ev.preventDefault();
       },
       false );
-    sec = Q.dom.div( { 'id': kExcludeKey }, Q.dom.h1( {}, 'prefetch @exclude'), frm );
-    if (( tmp = doc.getElementById(kExcludeKey) ) ) {
+    sec = Q.dom.div( { 'id': kExcludeKey }, Q.dom.h1( {}, 'prefetch @exclude' ), frm );
+    if ( ( tmp = doc.getElementById( kExcludeKey ) ) ) {
       body.replaceChild( sec, tmp );
     }
     else {
-      body.appendChild(sec);
+      body.appendChild( sec );
     }
   }
   createExcludSection();

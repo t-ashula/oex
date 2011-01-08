@@ -151,12 +151,31 @@
     };
     xhr.send( null );
   }
-  
- 
   var kExcludeKey = 'EFFExclude';
+  function initExcludes( exs ){
+    var excludes = sss.getItem( kExcludeKey ), ex, ne = [], i, j, jj, f;
+    excludes = excludes ? JSON.parse( excludes ) : [];
+    for ( i = 0; ex = excludes[ i ]; ++i ){
+      ne[ ne.length ] = ex;
+    }
+    for ( i = 0; ex = exs[ i ]; ++i ) {
+      f = true;
+      for ( j = 0; jj = ne[ j ]; ++j ) {
+        if ( jj == ex ) {
+          f = false;
+          break;
+        }
+      }
+      if ( f ){
+        ne[ ne.length ] = ex;          
+      }
+    }
+    sss.setItem( kExcludeKey, JSON.stringify( ne ) );
+  }
+ 
   function getDoPrefetch( url ){
     var expats = sss.getItem( kExcludeKey ), expat, i;
-    expats = expats ? JSON.parse( expats ) : ['twitter.com/', 'www.tumblr.com/'];
+    expats = expats ? JSON.parse( expats ) : [];
     ods('expats ;' + expats + typeof expats );
     for ( i = 0; expat = expats[ i ]; ++i ){
       if ( url.match( new RegExp( expat ) ) ) {
@@ -184,6 +203,7 @@
   
   win.addEventListener( 'load', function(ev) {
     updateEffSiteinfo();
+    initExcludes( ['twitter.com/', 'www.tumblr.com/', 'stackoverflow.com/', 'images.yandex.ru/'] );
     /* onmessage */
     oex.onmessage = function( ev ) {
       var msg = ev.data, src = ev.source, cmd = msg.cmd, payload = msg.payload, url, paths, prefetch;
