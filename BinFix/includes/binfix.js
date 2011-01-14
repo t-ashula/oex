@@ -121,8 +121,10 @@
             for ( j = 0; j < as.length; ++j ){
               e.appendChild( typeof as[ j ] === 'string' ? T( as[ j ] ) : as[ j ] );
             }
-          }              
-          e.appendChild( typeof as === 'string' ? T( as ) : as );
+          }
+          else{
+            e.appendChild( typeof as === 'string' ? T( as ) : as );
+          }
         }
       }
       return e;
