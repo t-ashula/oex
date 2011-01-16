@@ -6,7 +6,7 @@
   /* output debug string */
   var ods = (function( pkg, name ){
     return function( msg ){
-      /*__DEBUG__* opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
+      /*__DEBUG__*/ opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
     };
   })( 'efflite','opt.js' ),
     ins = function(o){ for( var i in o){ ods(o + '[' + i + '] =' + o[i]); } };
@@ -22,37 +22,47 @@
       'code','dfn','kbd','cite','q','img','object','applet' ];
     _html4.forEach( function( ele ){
       _dom[ ele ] = function(){
-        var _e = doc.createElement( ele ), _as = arguments[ 0 ];
-        if ( !!_as ) {
-          for ( var a in _as ) {
-            if ( _as[ 'hasOwnProperty' ]( a ) ) {
-              _e.setAttribute( a, _as[ a ] );
+        var e = doc.createElement( ele ), args = arguments, as = args[ 0 ], a, i, n, t;
+        if ( !!as ) {
+          for ( a in as ) {
+            if ( as.hasOwnProperty( a ) ) {
+              e.setAttribute( a, as[ a ] );
             }
           }
-          for ( var i = 1, n; n = arguments[ i ]; ++i ) {
-            _e.appendChild( ( typeof n === 'string' ) ? doc.createTextNode( n ) :  n ); 
+          for ( i = 1; n = args[ i ]; ++i ) {
+            if ( typeof n === 'string' ) {
+              e.appendChild( doc.createTextNode( n ) );
+            }
+            else if ( n instanceof Array ) {
+              for ( t = 0; a = n[ t ]; ++t ){
+                e.appendChild( typeof a === 'string' ? doc.createTextNode( a ) : a );
+              }
+            }
+            else {
+              e.appendChild( n );
+            }
           }
         }
-        return _e;
+        return e;
       };
     });
     return _dom;
   })();
 
-  var kExcludeKey = 'EFFExclude';
-  var kNewPatternKey = 'newexpat';
+  var kExcludeKey = 'EFFExclude',
+    kNewPatternKey = 'newexpat';
   function createExcludSection() {
     var excludes = JSON.parse( sss.getItem( kExcludeKey ) ) || [ 'twitter.com/', 'www.tumblr.com/' ], sec, tmp;
     var frm = Q.dom.form(
       { 'id' : 'addexclude', 'action' : '' },
       Q.dom.ul(
         {},
-        excludes.map( function(i) {
+        excludes.map( function( i ) {
           var id = 'exurl' + i;
           return Q.dom.li(
             {},
-            Q.dom.input( { 'id': id, 'type' : 'checkbox', 'value' : enc( ex ), 'checked' : 'checked' } ),
-            Q.dom.label( { 'for' : id }, ex )
+            Q.dom.input( { 'id': id, 'type' : 'checkbox', 'value' : enc( i ), 'checked' : 'checked' } ),
+            Q.dom.label( { 'for' : id }, i  )
           );
         })
       ),
@@ -63,9 +73,9 @@
       'submit',
       function (ev){
         var nexs = [], exs = doc.getElementById( kExcludeKey ),
-          newpat = doc.getElementById( kNewPatternKey ).value, checked;
+          newpat = doc.getElementById( kNewPatternKey ).value, i, ex, ii;
         exs = exs.getElementsByTagName( 'li' );
-        for ( var i = 0, ex, ii; ex = exs.item( i ); ++i ){
+        for ( i = 0; ex = exs.item( i ); ++i ){
           ii = ex.getElementsByTagName( 'input' ).item( 0 );
           if ( ii.checked ) {
             nexs.push( dec( ii.value ) );

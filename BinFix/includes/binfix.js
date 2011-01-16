@@ -8,7 +8,7 @@
   /* output debug string */
   var ods = (function( pkg, name ){
     return function( msg ){
-      /**/ win.opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
+      /** win.opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
     };
   })( 'binfix','binfix.js' );
   function isOwner(){
@@ -35,40 +35,40 @@
     var binarray = function( data ){
       this.data = data;
       this.dlen = data.length;
-      this.getByteAt = function( i ){
-        return this.data.charCodeAt( i ) & 0xff;
-      };
-      this.getBytes = function( idx, len ) {
-        var i = 0, d = [];
-        for (; i < len && idx + i < this.dlen; ++i ){
-          d[ i ] = this.getByteAt( idx + i );
-        }
-        return d;
-      };
-      this._b64cs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'.split('');
-      this.toBase64 = function(){
-        var b64ces = this._b64cs, out = [], i = 0, len = this.dlen, c, u1, u2, u3, d1, d2, d3;
-        while( i < len ) {
-	  c = this.getByteAt( i++ ); u1 = c >> 2; d1 = ( c & 0x03 ) << 4;
-          out[ out.length ] = b64ces[ u1 ];
-	  if( i === len ) {
-            out[ out.length ] = b64ces[ d1 ];
-            out[ out.length ] = '=='; /**/
-	    break;
-	  }
-	  c = this.getByteAt( i++ ); u2 = ( c & 0xF0 ) >> 4; d2 = ( c & 0x0F ) << 2;
-          out[ out.length ] = b64ces[ d1 | u2 ];
-	  if( i === len ) {
-            out[ out.length ] = b64ces[ d2 ];
-            out[ out.length ] = '=';
-	    break;
-	  }
-	  c = this.getByteAt( i++ ); u3 = ( c & 0xC0 ) >> 6; d3 = c & 0x3F;
-          out[ out.length ] = b64ces[ d2 | u3 ];
-          out[ out.length ] = b64ces[ d3 ];
-        }
-        return out.join( '' );
-      };
+    };
+    binarray.prototype.getByteAt = function( i ){
+      return this.data.charCodeAt( i ) & 0xff;
+    };
+    binarray.prototype.getBytes = function( idx, len ) {
+      var i = 0, d = [];
+      for (; i < len && idx + i < this.dlen; ++i ){
+        d[ i ] = this.getByteAt( idx + i );
+      }
+      return d;
+    };
+    binarray.prototype._b64cs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'.split('');
+    binarray.prototype.toBase64 = function(){
+      var b64ces = this._b64cs, out = [], i = 0, len = this.dlen, c, u1, u2, u3, d1, d2, d3;
+      while( i < len ) {
+	c = this.getByteAt( i++ ); u1 = c >> 2; d1 = ( c & 0x03 ) << 4;
+        out[ out.length ] = b64ces[ u1 ];
+	if( i === len ) {
+          out[ out.length ] = b64ces[ d1 ];
+          out[ out.length ] = '=='; /**/
+	  break;
+	}
+	c = this.getByteAt( i++ ); u2 = ( c & 0xF0 ) >> 4; d2 = ( c & 0x0F ) << 2;
+        out[ out.length ] = b64ces[ d1 | u2 ];
+	if( i === len ) {
+          out[ out.length ] = b64ces[ d2 ];
+          out[ out.length ] = '=';
+	  break;
+	}
+	c = this.getByteAt( i++ ); u3 = ( c & 0xC0 ) >> 6; d3 = c & 0x3F;
+        out[ out.length ] = b64ces[ d2 | u3 ];
+        out[ out.length ] = b64ces[ d3 ];
+      }
+      return out.join( '' );
     };
     var baToStr = function( ba ) {
       return ba.map( function( e ){ return String.fromCharCode( e ); } ).join( '' );
