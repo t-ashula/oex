@@ -107,7 +107,7 @@
       return doc.createTextNode( e );
     };
     var N = function() {
-      var args = arguments, l = args.length, e = doc.createElement( args[ 0 ] ), as, k;
+      var args = arguments, l = args.length, e = doc.createElement( args[ 0 ] ), as, k, j;
       if ( l > 1 ) {
         as = args[ 1 ];
         for ( k in as ) {
@@ -116,64 +116,100 @@
           }
         }
         for ( k = 2; k < l; ++k ) {
-          e.appendChild( args[ k ] );
+          as = args[ k ];
+          if ( as instanceof Array ) {
+            for ( j = 0; j < as.length; ++j ){
+              e.appendChild( typeof as[ j ] === 'string' ? T( as[ j ] ) : as[ j ] );
+            }
+          }
+          else{
+            e.appendChild( typeof as === 'string' ? T( as ) : as );
+          }
         }
       }
       return e;
     };
     var handlers = {
-      'image' : function( type, bary, ns ){
-        if ( !!ns ) {
-          handlers[ 'unknown' ]( type, bary, true );
-        }
-        else {
-          doc.body.innerHTML = '';
-          doc.body.appendChild(
-            N( 'div', { 'style' : "width:100%;margin:0 auto" },
-               N( 'img', { 'src' : loc.href, 'alt': "" } ),
-               N( 'p', {}, T( type ) )));
-        }
-      }
-      ,'application' : function ( type, bary, ns ) {
-        if ( !!ns ) {
-          handlers[ 'unknown' ]( type, bary, true );
-        }
-        else {
-          doc.body.innerHTML = '';
-          var b = N( 'button', {}, T( 'Open' ) );
-          b.addEventListener( 'click', function(){ win.location = 'data:' + type + ';base64,' + bary.toBase64(); }, false );
-          doc.body.appendChild(
-            N( 'div', {},
-              N( 'p', {}, T( 'BinFix extension detect ' + type + ' file.' ) ),
-              N( 'p', {}, N( 'a', { 'href' : loc.href }, T( 'download (right click and "Save content as")' ) ) ),
-              N( 'p', {}, T( 'this button does not work properly if open ' + type + ' file with plugin.' ) ),
-              b
-             )
-          );
-        }
-      }
-      ,'unknown' : function ( type, bary, ns ){
+      'unknown' : function ( type, bary, ns ){
         doc.body.innerHTML = '';
         if ( !!ns ) {
           doc.body.appendChild(
             N( 'p', {}, N( 'strong', {}, T( 'HTTP response contains ' + XCTO + ':nosniff. So stop content-type fix.' ) ) ) );
         }
         doc.body.appendChild(
-          N( 'p', {},
-            N( 'p', {}, N( 'a', { 'href' : loc.href }, T( 'download (right click and "Save content as")' ) ) ) ) );
-        var p = N( 'pre', {}, T( bary.data ) );
-        doc.body.appendChild( p );
+          N( 'div', {},
+             N( 'p', {}, N( 'a', { 'href' : loc.href }, T( 'download (right click and "Save content as")' ) ) ),
+             N( 'p', {}, T( 'maybe ' + type  ) ),
+             N( 'pre', {}, T( bary.data ) ) ) );
       }
     };
-    (function(){
-      var q = { 'image' : [ 'png', 'gif', 'jpeg' ] ,
-                'application' : [ 'pdf','x-rar-compressed','x-msdos-program', 'x-msdownload' ] }, i;
-      for (i in q) {
-        if ( q.hasOwnProperty( i ) ){
-          q[ i ].forEach( function( t ) { handlers[ i + '/' + t ] = handlers[ i ]; } );
-        }
+    handlers[ 'image/' ] = function( type, bary, ns ){
+      if ( !!ns ) {
+        handlers[ 'unknown' ]( type, bary, true );
       }
-    })();
+      else {
+        doc.body.innerHTML = '';
+        doc.body.appendChild(
+          N( 'div', { 'style' : "width:100%;margin:0 auto" },
+             N( 'img', { 'src' : loc.href, 'alt': "" } ),
+             N( 'p', {}, T( type ) ) ) );
+      }
+    };
+    [ 'png', 'gif', 'jpeg' ].forEach(
+      function( t ){
+        handlers[ 'image/' + t ] = handlers[ 'image/' ];
+      });
+    handlers[ 'application/' ] = function ( type, bary, ns ) {
+      if ( !!ns ) {
+        handlers[ 'unknown' ]( type, bary, true );
+      }
+      else {
+        doc.body.innerHTML = '';
+        var b = N( 'button', {}, T( 'Open' ) );
+        b.addEventListener( 'click', function(){ win.location = 'data:' + type + ';base64,' + bary.toBase64(); }, false );
+        doc.body.appendChild(
+          N( 'div', {},
+             N( 'p', {}, T( 'BinFix extension detect ' + type + ' file.' ) ),
+             N( 'p', {}, N( 'a', { 'href' : loc.href }, T( 'download (right click and "Save content as")' ) ) ),
+             N( 'p', {}, T( 'this button does not work properly if open ' + type + ' file with plugin.' ) ),
+             b ) );
+      }
+    };
+    [ 'pdf','x-rar-compressed','x-msdos-program', 'x-msdownload', 'x-xz', 'x-lzma', 'x-gzip', 'bzip2' ].forEach(
+      function(t){
+        handlers[ 'application/' + t ] = handlers['application/'];
+      });
+    handlers[ 'application/zip' ] = function ( type, bary, ns ) {        
+      var zips = [ {  'ext' : 'zip',  'mime' : 'application/zip', 'desc' : 'general zip archive' }
+                   ,{ 'ext' : 'jar',  'mime' : 'application/java-archive', 'desc' : 'Java archive' }
+                   ,{ 'ext' : 'apk',  'mime' : 'application/vnd.android.package-archive', 'desc' : 'Android package' }
+                   ,{ 'ext' : 'docx', 'mime' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'desc' : 'MS Word' }
+                   ,{ 'ext' : 'pptx', 'mime' : 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'desc' : 'MS PowerPoint' }
+                   ,{ 'ext' : 'xlsx', 'mime' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'desc' : 'MS Excel' }
+                   ,{ 'ext' : 'odt',  'mime' : 'application/vnd.oasis.opendocument.text', 'desc' : 'OpenDocument Text' }
+                   ,{ 'ext' : 'ods',  'mime' : 'application/vnd.oasis.opendocument.spreadsheet', 'desc' : 'OpenDocument Spreadsheet' }
+                   ,{ 'ext' : 'odp',  'mime' : 'application/vnd.oasis.opendocument.presentation', 'desc' : 'OpenDocument Presentation' }
+                   ,{ 'ext' : 'odb',  'mime' : 'application/vnd.oasis.opendocument.database', 'desc' : 'OpenDocument Database' }
+                   ,{ 'ext' : 'odg',  'mime' : 'application/vnd.oasis.opendocument.graphics', 'desc' : 'OpenDocument Graphics' }
+                 ];
+      if ( !!ns ) {
+        handlers[ 'unknown' ]( type, bary, true );
+      }
+      else {
+        doc.body.innerHTML = '';
+        var b = N( 'button', {}, T( 'Open' ) );
+        b.addEventListener( 'click', function(){
+          var mm = document.getElementById('mimes'), i, m;
+          for(i = 0;m = mm[i];++i){ if (m.selected){ break; } }
+          win.location = 'data:' + (m ? m : mm[0]).value + ';base64,' + bary.toBase64(); }, false );
+        doc.body.appendChild(
+          N( 'div', {},
+           N( 'p', {}, T( 'ZIP based file detected. Select file type you guess and push "Open" button.' ) ),
+           N( 'select', { 'id' : 'mimes' },
+            zips.map(function( z ){ return N( 'option', { 'value': z.mime }, T( z.desc + '( .' + z.ext + ' )' ) ); }) ),
+           b ) );
+      }
+    };    
     var guessType = function( ba ){
       return (function( b, h ){ h = b.getBytes( 0, 2 ); return memcmp( h, [ 0xff, 0xd8 ] ); })( ba )         ? 'image/jpeg' :
         (function( b, h ) { h = b.getBytes( 0, 4 ); return memcmp( h, [ 0x89, 0x50, 0x4e, 0x47 ] ); })( ba ) ? 'image/png' :
@@ -182,6 +218,11 @@
         (function( b, h ) { h = b.getBytes( 0, 2 ); return baToStr( h ) === 'MZ'; })( ba )                   ? 'application/x-msdownload' :
         (function( b, h ) { h = b.getBytes( 0, 5 ); return baToStr( h ) === '%PDF-'; })( ba )                ? 'application/pdf' :        
         (function( b, h ) { h = b.getBytes( 0, 4 ); return baToStr( h ) === 'Rar!' || memcmp( h, [ 0x52, 0x45, 0x7e, 0x5e ] ); })( ba ) ? 'application/x-rar-compressed' :
+        (function( b, h ) { h = b.getBytes( 0, 6 ); return memcmp( h, [ 0xfd, 0x37, 0x7a, 0x58, 0x5a, 0x00 ] ); })( ba ) ? 'application/x-xz' :
+        (function( b, h ) { h = b.getBytes( 0, 5 ); return memcmp( h, [ 0x5d, 0x00, 0x00, 0x80, 0x00 ] ); })( ba ) ? 'application/x-lzma' :
+        (function( b, h ) { h = b.getBytes( 0, 3 ); return memcmp( h, [ 0x1f, 0x8b, 0x08 ] ); })( ba ) ? 'application/x-gzip' :
+        (function( b, h ) { h = b.getBytes( 0, 3 ); return baToStr( h ) === 'BZh'; })( ba ) ? 'application/bzip2' :
+        (function( b, h ) { h = b.getBytes( 0, 2 ); return baToStr( h ) === 'PK'; })( ba ) ? 'application/zip' : 
         'unknown';
     };
     if ( flooding() ) {
