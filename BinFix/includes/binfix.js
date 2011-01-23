@@ -25,14 +25,14 @@
     return;
   }
   win.addEventListener( 'load', function () {
-    var flooding = function(){
+    function flooding(){
       var body = doc.body, head = doc.head;
       return win == win.self
         && !loc.pathname.match(/.(js|css|txt|html)$/)
         && ( head && head.children.length === 0 )
         && (( body.innerHTML.indexOf('\uFFFD') !== -1) );
     };
-    var binarray = function( data ){
+    function binarray( data ){
       this.data = data;
       this.dlen = data.length;
     };
@@ -70,10 +70,10 @@
       }
       return out.join( '' );
     };
-    var baToStr = function( ba ) {
+    function baToStr( ba ) {
       return ba.map( function( e ){ return String.fromCharCode( e ); } ).join( '' );
     };
-    var memcmp = function( lhs, rhs ) {
+    function memcmp( lhs, rhs ) {
       var i, l;
       for ( i = 0, l = lhs.length; i < l; ++i ) {
         if ( lhs[ i ] !== rhs[ i ] ) {
@@ -83,7 +83,7 @@
       return true;
     };
     var XCTO = 'X-Content-Type-Options';
-    var getHead = function( url, cb ) {
+    function getHead( url, cb ) {
       var xhr = new XHR(), ns;
       xhr.open( 'GET', url, true );
       xhr.setRequestHeader( 'Range', 'bytes=0-50' );
@@ -103,10 +103,10 @@
         }
       };
     };
-    var T = function( e ) {
+     function T( e ) {
       return doc.createTextNode( e );
     };
-    var N = function() {
+    function N() {
       var args = arguments, l = args.length, e = doc.createElement( args[ 0 ] ), as, k, j;
       if ( l > 1 ) {
         as = args[ 1 ];
@@ -199,18 +199,32 @@
         doc.body.innerHTML = '';
         var b = N( 'button', {}, T( 'Open' ) );
         b.addEventListener( 'click', function(){
-          var mm = document.getElementById('mimes'), i, m;
-          for(i = 0;m = mm[i];++i){ if (m.selected){ break; } }
-          win.location = 'data:' + (m ? m : mm[0]).value + ';base64,' + bary.toBase64(); }, false );
+          var mm = document.getElementById( 'mimes' ), i, m, ex = [], url;
+          for(i = 0;m = mm[i];++i){
+            if ( m.selected ){
+              break;
+            }
+          }
+          m = m ? m : mm[ 0 ];
+          ex = m.value.split( ';', 2 );
+          url = /*win.location =*/ 'data:' + ex[ 1 ]
+            + ';content-disposition%3dattachment%3bfilename%3d%22foobar%2e' + ex[ 0 ] + '%22'
+            + ';base64,' + bary.toBase64();
+          doc.body.appendChild(
+            N( 'div', {},
+               N( 'iframe', { 'src' : url, 'style' : 'display:none' } ),
+               N( 'a', { 'href' : url }, T( 'download:' ) ) )                  
+          );          
+        }, false );
         doc.body.appendChild(
           N( 'div', {},
            N( 'p', {}, T( 'ZIP based file detected. Select file type you guess and push "Open" button.' ) ),
            N( 'select', { 'id' : 'mimes' },
-            zips.map(function( z ){ return N( 'option', { 'value': z.mime }, T( z.desc + '( .' + z.ext + ' )' ) ); }) ),
+            zips.map(function( z ){ return N( 'option', { 'value': z.ext + ';' + z.mime }, T( z.desc + '( .' + z.ext + ' )' ) ); }) ),
            b ) );
       }
     };    
-    var guessType = function( ba ){
+    function guessType( ba ){
       return (function( b, h ){ h = b.getBytes( 0, 2 ); return memcmp( h, [ 0xff, 0xd8 ] ); })( ba )         ? 'image/jpeg' :
         (function( b, h ) { h = b.getBytes( 0, 4 ); return memcmp( h, [ 0x89, 0x50, 0x4e, 0x47 ] ); })( ba ) ? 'image/png' :
         (function( b, h ) { h = b.getBytes( 0, 4 ); return baToStr( h ) === 'GIF8'; })( ba )                 ? 'image/gif' :
