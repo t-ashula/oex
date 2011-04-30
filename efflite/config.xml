@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <widget xmlns="http://www.w3.org/ns/widgets"
-        version="1.3.1" >
-  <name>Extream Fast Forward</name>
-  <description>Fastforward enhancement.</description>
+        defaultlocale="en" 
+        version="1.4" >
+  <name xml:lang="en">Extream Fast Forward</name>
+  <name xml:lang="ja">えくすとりーむふぁすとふぉーわーど</name>
+  <description xml:lang="en">Fastforward enhancement.</description>
+  <description xml:lang="ja">AutoPagerize で Fast Forward.</description>
   <author href="http://ashula.info" email="office@ashula.info">t.ashula</author>
   <icon src="icons/eff.png" />
   <access origin="*" />

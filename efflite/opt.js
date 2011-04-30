@@ -6,10 +6,10 @@
   /* output debug string */
   var ods = (function( pkg, name ){
     return function( msg ){
-      /*__DEBUG__*/ opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
+      /*__DEBUG__* opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
     };
-  })( 'efflite','opt.js' ),
-    ins = function(o){ for( var i in o){ ods(o + '[' + i + '] =' + o[i]); } };
+  })( 'efflite', 'opt.js' ),
+    ins = function( o ){ for( var i in o ){ ods( o + '[' + i + '] =' + o[ i ] ); } };
   /* Q */
   var Q = {};
   Q[ 'dom' ] = (function(){
@@ -29,12 +29,12 @@
               e.setAttribute( a, as[ a ] );
             }
           }
-          for ( i = 1; n = args[ i ]; ++i ) {
+          for ( i = 1; n = args[ i ]; i += 1 ) {
             if ( typeof n === 'string' ) {
               e.appendChild( doc.createTextNode( n ) );
             }
             else if ( n instanceof Array ) {
-              for ( t = 0; a = n[ t ]; ++t ){
+              for ( t = 0; a = n[ t ]; t += 1 ){
                 e.appendChild( typeof a === 'string' ? doc.createTextNode( a ) : a );
               }
             }
@@ -66,16 +66,16 @@
           );
         })
       ),
-      Q.dom.input( { 'type':'text', 'id': kNewPatternKey } ),
-      Q.dom.input( { 'type':'submit', 'id':'addnewex' }, 'Update' )
+      Q.dom.input( { 'type' : 'text',   'id' : kNewPatternKey } ),
+      Q.dom.input( { 'type' : 'submit', 'id' : 'addnewex' }, 'Update' )
     );
     frm.addEventListener(
       'submit',
-      function (ev){
-        var nexs = [], exs = doc.getElementById( kExcludeKey ),
+      function ( ev ){
+        var nexs = [],
+          exs = doc.getElementById( kExcludeKey ).getElementsByTagName( 'li' ),
           newpat = doc.getElementById( kNewPatternKey ).value, i, ex, ii;
-        exs = exs.getElementsByTagName( 'li' );
-        for ( i = 0; ex = exs.item( i ); ++i ){
+        for ( i = 0; ex = exs.item( i ); i += 1 ){
           ii = ex.getElementsByTagName( 'input' ).item( 0 );
           if ( ii.checked ) {
             nexs.push( dec( ii.value ) );

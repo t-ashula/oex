@@ -5,7 +5,8 @@
   window.addEventListener( 'DOMContentLoaded', function(){
     /* aliases */
     var win = window, loc = win.location, doc = win.document, oex = opera.extension,
-      enc = win.encodeURIComponent, dec = win.decodeURIComponent, XPathResult = win.XPathResult;
+      enc = win.encodeURIComponent, dec = win.decodeURIComponent,
+      XPathResult = win.XPathResult, XHR = win.XMLHttpRequest;
     
     /* output debug string */
     var ods = (function( pkg, name ){
@@ -29,7 +30,7 @@
     function $X( xpath, context ){
       var result = doc.evaluate( xpath, doc, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null ),
         len = result.snapshotLength, ret = [], i;
-      for ( i = 0; i < len; ++i ){
+      for ( i = 0; i < len; i += 1 ){
         ret[ i ] = result.snapshotItem( i );
       }
       return ret;
@@ -41,19 +42,16 @@
     }
     function appendNavi( d, type, xpath, doPrefetch ){
       var href = getUrlFormXpath( xpath ),
-        head = d.getElementsByTagName( 'head' ), l;
-      if ( ( !head ) ) {
-          return false;
-      }
+        head = d.head, l;
       if ( href === "" )  {
         return false;
       }
-      if( ( head = head[ 0 ] ) && head.querySelector( 'link[rel="' + type + '"]' ) != null ) {
+      if( !head || ( head.querySelector( 'link[rel="' + type + '"]' ) != null ) ) {
         return false;
       }
       l = d.createElement( 'link' );
       l.rel = type;
-      l.href = ( href.href ) ? href.href : href;
+      l.href = ( !!href.href ) ? href.href : href;
       head.appendChild( l );
       ods( 'appended;' + type + ':' + xpath );
       //ods( win.XPathEvaluator );
@@ -64,11 +62,11 @@
       return appendNavi( doc, 'next', xpath );
     }
     function appendPrev( xpath ) {
-      ods('prev;' + xpath );
+      //ods('prev;' + xpath );
       return appendNavi( doc, 'prev', xpath );
     }
-
     function prefetch( d, type ){
+      ods('pref:'+type);
       var href = d.head.querySelector( 'link[rel="' + type + '"]' );
       if ( !!href ){
         href = href.href;
@@ -76,14 +74,33 @@
       else {
         return;
       }
-      var iframe = d.createElement( 'iframe' );
-      d.body.appendChild( iframe );
-      iframe.src = href;
-      iframe.width = iframe.height = '1px';
-      iframe.onload = function(){
-        ods( 'prefetched:' + href );
-        d.body.removeChild( iframe );
+      ods('pref:'+type+':'+href);
+      var preXHR = new XHR();
+      preXHR.open( 'GET', href, false );
+      preXHR.onreadystatechange = function() {
+        if ( preXHR.readyState === 4 && preXHR.status === 200 ){
+          var pbox = d.createElement( 'iframe' );
+          var dd = preXHR.responseText
+            .replace(/[\r\n]/g,'')
+            .replace(/<!--.*-->/ig,'')
+            .replace(/<script[^>]*>/ig, '<!--').replace(/script>/ig, '-->')
+            .replace(/<!--.*-->/ig,'')
+            .replace(/<(title)[^>]*>/ig, '<!--').replace(/(title)>/ig, '-->')
+            .replace(/<!--.*-->/ig,'')
+            .replace(/<head[^>]*>/ig, '<!--').replace(/head>/ig, '-->')
+            .replace(/<!--.*-->/ig,'');
+
+          ods(dd);
+          pbox.style.height = pbox.style.width = '1px';
+          pbox.onload = function(){
+            ods( 'prefetched:' + href );
+            doc.body.removeChild( pbox );
+          };
+          doc.body.appendChild( pbox );
+          pbox.contentDocument.body.innerHTML = dd;
+        }
       };
+      preXHR.send( null );
     }
 
     function prefetchNext(){
@@ -103,14 +120,14 @@
        case 'res':
         paths = payload.paths;
         dopref = payload.doPrefetch;
-        for ( i = 0; path = paths[ i ]; ++i ) {
-          path.next && appendNext( path.next );
-          path.prev && appendPrev( path.prev );
+        for ( i = 0; path = paths[ i ]; i += 1 ) {
+          !!path.next && appendNext( path.next );
+          !!path.prev && appendPrev( path.prev );
         }
+        ods( 'doPrefetch:' + dopref );
         if ( dopref ){
-          ods('doPrefetch:' + dopref );
-          prefetchNext( );
-          prefetchPrev( );
+          prefetchPrev();
+          prefetchNext();
         }
         break;
       }

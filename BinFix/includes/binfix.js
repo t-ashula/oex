@@ -28,7 +28,7 @@
     function flooding(){
       var body = doc.body, head = doc.head;
       return win == win.self
-        && !loc.pathname.match(/.(js|css|txt|html)$/)
+        && !loc.pathname.match(/.(js|css|html)$/)
         && ( head && head.children.length === 0 )
         && (( body.innerHTML.indexOf('\uFFFD') !== -1) );
     };
@@ -40,8 +40,8 @@
       return this.data.charCodeAt( i ) & 0xff;
     };
     binarray.prototype.getBytes = function( idx, len ) {
-      var i = 0, d = [];
-      for (; i < len && idx + i < this.dlen; ++i ){
+      var i = 0, d = [], l = this.dlen;
+      for (; i < len && idx + i < l; i += 1 ){
         d[ i ] = this.getByteAt( idx + i );
       }
       return d;
@@ -75,7 +75,7 @@
     };
     function memcmp( lhs, rhs ) {
       var i, l;
-      for ( i = 0, l = lhs.length; i < l; ++i ) {
+      for ( i = 0, l = lhs.length; i < l; i += 1 ) {
         if ( lhs[ i ] !== rhs[ i ] ) {
           return false;
         }
@@ -85,23 +85,25 @@
     var XCTO = 'X-Content-Type-Options';
     function getHead( url, cb ) {
       var xhr = new XHR(), ns;
-      xhr.open( 'GET', url, true );
-      xhr.setRequestHeader( 'Range', 'bytes=0-50' );
-      xhr.overrideMimeType( 'text/plain; charset=x-user-defined' );
-      xhr.send( null );
       xhr.onreadystatechange = function() {
         var xcto = void 0;
         try{
-          if ( xhr.readyState === 2 ){
+          //if ( xhr.readyState === 2 ){
+            ods( [ xhr.readyState, xhr.getAllResponseHeaders() ]);
             ns = ( ( xcto = xhr.getResponseHeader( XCTO ) ) && xcto.match( /nosnif/i ) );
-          }
+          //}
         }
         catch (x) {
+          ods( x );
         }
         if ( xhr.readyState === 4 && xhr.status === 200 ) {
           cb( new binarray( xhr.responseText ), ns );
         }
       };
+      xhr.open( 'GET', url, true );
+      xhr.setRequestHeader( 'Range', 'bytes=0-50' );
+      xhr.overrideMimeType( 'text/plain; charset=x-user-defined' );
+      xhr.send( null );
     };
      function T( e ) {
       return doc.createTextNode( e );
@@ -175,6 +177,7 @@
              b ) );
       }
     };
+    handlers[ 'image/djvu' ] = handlers[ 'application/' ];
     [ 'pdf','x-rar-compressed','x-msdos-program', 'x-msdownload', 'x-xz', 'x-lzma', 'x-gzip', 'bzip2' ].forEach(
       function(t){
         handlers[ 'application/' + t ] = handlers['application/'];
@@ -228,6 +231,7 @@
       return (function( b, h ){ h = b.getBytes( 0, 2 ); return memcmp( h, [ 0xff, 0xd8 ] ); })( ba )         ? 'image/jpeg' :
         (function( b, h ) { h = b.getBytes( 0, 4 ); return memcmp( h, [ 0x89, 0x50, 0x4e, 0x47 ] ); })( ba ) ? 'image/png' :
         (function( b, h ) { h = b.getBytes( 0, 4 ); return baToStr( h ) === 'GIF8'; })( ba )                 ? 'image/gif' :
+        (function( b, h ) { h = b.getBytes( 0, 8 ); return baToStr( h ) === 'AT&FORM'; })( ba )              ? 'image/djvu' :
         (function( b, h ) { h = b.getBytes( 0, 2 ); return baToStr( h ) === 'MZ'; })( ba )                   ? 'application/x-msdos-program' :
         (function( b, h ) { h = b.getBytes( 0, 2 ); return baToStr( h ) === 'MZ'; })( ba )                   ? 'application/x-msdownload' :
         (function( b, h ) { h = b.getBytes( 0, 5 ); return baToStr( h ) === '%PDF-'; })( ba )                ? 'application/pdf' :        
