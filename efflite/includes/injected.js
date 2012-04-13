@@ -79,18 +79,14 @@
       preXHR.open( 'GET', href, false );
       preXHR.onreadystatechange = function() {
         if ( preXHR.readyState === 4 && preXHR.status === 200 ){
-          var pbox = d.createElement( 'iframe' );
           var dd = preXHR.responseText
             .replace(/[\r\n]/g,'')
-            .replace(/<!--.*-->/ig,'')
-            .replace(/<script[^>]*>/ig, '<!--').replace(/script>/ig, '-->')
-            .replace(/<!--.*-->/ig,'')
-            .replace(/<(title)[^>]*>/ig, '<!--').replace(/(title)>/ig, '-->')
-            .replace(/<!--.*-->/ig,'')
-            .replace(/<head[^>]*>/ig, '<!--').replace(/head>/ig, '-->')
-            .replace(/<!--.*-->/ig,'');
-
+            .replace(/<script[^>]*>/ig, '<!--').replace(/script>/ig, '-->').replace(/<!--.*-->/ig,'')
+            .replace(/<(title)[^>]*>/ig, '<!--').replace(/(title)>/ig, '-->').replace(/<!--.*-->/ig,'')
+            .replace(/<head[^>]*>/ig, '<!--').replace(/head>/ig, '-->').replace(/<!--.*-->/ig,'')
+            .replace(/(\bon[a-zA-Z]+)=(.+)/ig,'');
           ods(dd);
+          var pbox = d.createElement( 'iframe' );
           pbox.style.height = pbox.style.width = '1px';
           pbox.onload = function(){
             ods( 'prefetched:' + href );

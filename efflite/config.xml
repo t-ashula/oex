@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <widget xmlns="http://www.w3.org/ns/widgets"
         defaultlocale="en" 
-        version="1.4" >
+        version="1.5" >
   <name xml:lang="en">Extream Fast Forward</name>
   <name xml:lang="ja">えくすとりーむふぁすとふぉーわーど</name>
   <description xml:lang="en">Fastforward enhancement.</description>

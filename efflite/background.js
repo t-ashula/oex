@@ -29,7 +29,7 @@
   function updateEffSiteinfo(){
     var SITEINFOURI = 'http://wedata.net/databases/AutoPagerize/items.json';
     var xhr = new XMLHttpRequest();
-    xhr.open( 'GET', SITEINFOURI );
+    xhr.open( 'GET', SITEINFOURI, true );
     xhr.onreadystatechange = function(){
       if ( xhr.readyState === 4 && xhr.status === 200 ){
         var tmp = [], old = SITEINFO, item, i, prev;
