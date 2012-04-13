@@ -11,7 +11,7 @@
     /* output debug string */
     var ods = (function( pkg, name ){
       return function( msg ){
-        /*__DEBUG__* win.opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
+        /*__DEBUG__*/ win.opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
       };
     })( 'efflite','injected.js' );
     function isOwner(){
@@ -54,7 +54,6 @@
       l.href = ( !!href.href ) ? href.href : href;
       head.appendChild( l );
       ods( 'appended;' + type + ':' + xpath );
-      //ods( win.XPathEvaluator );
       return true;
     }
 
@@ -62,7 +61,6 @@
       return appendNavi( doc, 'next', xpath );
     }
     function appendPrev( xpath ) {
-      //ods('prev;' + xpath );
       return appendNavi( doc, 'prev', xpath );
     }
     function prefetch( d, type ){
@@ -108,7 +106,7 @@
     /* onmessage */
     oex.onmessage = function( ev ) {
       var msg = ev.data, src = ev.source, cmd = msg.cmd, payload = msg.payload, i, path, paths, dopref;
-      //ods( 'cmd:' + cmd ); ods( 'pay:' + payload );
+      ods( 'cmd:' + cmd ); ods( 'pay:' + payload );
       switch( cmd ){
        case 'req':
         src.postMessage( { 'cmd' : 'res', 'payload' : enc( loc ) } );    

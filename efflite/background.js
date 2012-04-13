@@ -9,7 +9,7 @@
   /* output debug string */
   var ods = (function( pkg, name ){
     return function( msg ){
-      /*__DEBUG__* opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
+      /*__DEBUG__*/ opera.postError( pkg + '::' + name + ' <' + msg + '>' );/**/
     };
   })( 'efflite','background.js' );
 
@@ -138,7 +138,7 @@
     };
     oex.onconnect = function( ev ) {
       var msg = ev.data, src = ev.source;
-      //ods( 'msg:' + msg ); ods( 'src:' + src );
+      ods( 'msg:' + msg ); ods( 'src:' + src );
       try{
         src.postMessage( { 'cmd' : 'req', 'payload' : 'send back url' } );          
       }
